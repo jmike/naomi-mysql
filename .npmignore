@@ -1,0 +1,13 @@
+.travis.yml
+.env
+.eslintrc
+.gitignore
+.babelrc
+
+CHANGELOG.md
+gulpfile.babel.js
+
+assets/
+test/
+docs/
+src/
