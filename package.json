@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "bluebird": "^3.0.6",
+    "customerror": "^1.0.1",
     "lodash": "^3.10.1",
     "mysql": "^2.9.0"
   }
