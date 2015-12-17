@@ -17,7 +17,7 @@ class MySqlDatabase extends Database {
    * @throws {TypeError} if arguments are of invalid type
    * @constructor
    */
-  constructor(connectionProperties: Object) {
+  constructor(connectionProperties: {database: string, host: ?string, port: ?number, user: ?string, password: ?string, connectionLimit: ?number}) {
     // handle optional connection props
     connectionProperties = _.defaults(connectionProperties, {
       host: 'localhost',
@@ -167,7 +167,7 @@ class MySqlDatabase extends Database {
         if (err) return reject(err);
         resolve(conn);
       });
-    };
+    });
   }
 
   /**
@@ -198,8 +198,7 @@ class MySqlDatabase extends Database {
 
         // handle SELECT statement response
         if (_.isArray(records)) {
-          resolve(records);
-          return; // exit
+          return resolve(records); // exit
         }
 
         // handle DML statement response
@@ -208,7 +207,7 @@ class MySqlDatabase extends Database {
           affectedRows: records.affectedRows
         });
       });
-    };
+    });
   }
 
 }
