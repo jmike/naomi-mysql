@@ -89,6 +89,128 @@ class MySqlDatabase extends Database {
       .nodeify(callback);
   }
 
+  /**
+   * Runs the given parameterized SQL statement.
+   * @param {string} sql the SQL statement.
+   * @param {Array} [params] an array of parameter values.
+   * @param {Object} [options] query options.
+   * @param {Function} [callback] a callback function with (err, records) arguments.
+   * @returns {Promise} a bluebird promise resolving to the query results.
+   * @throws {TypeError} if arguments are of invalid type
+   */
+  query(sql: string, params: ?Object | Function, options: ?Object | Function, callback: ?Function): Promise {
+    // handle optional arguments
+    if (_.isFunction(params)) {
+      callback = params;
+      options = {};
+      params = [];
+    } else if (_.isPlainObject(params)) {
+      options = params;
+      params = [];
+    } else if (_.isUndefined(params)) {
+      params = [];
+    } else if (!_.isArray(params)) {
+      throw new TypeError('Invalid params argument');
+    }
+
+    if (_.isFunction(options)) {
+      callback = options;
+      options = {};
+    } else if (_.isUndefined(options)) {
+      options = {};
+    } else if (!_.isPlainObject(options)) {
+      throw new TypeError('Invalid options argument');
+    }
+
+    // setup promise resolver
+    const resolver = (resolve, reject) => {
+      // acquire new connection from pool
+      this._acquireConnection()
+
+        // run query using connection
+        .then((conn) => {
+          return this._queryConnection(conn, sql, params, options)
+
+            // always release previously acquired connection
+            .finally(() => {
+              return this._releaseConnection(conn);
+            });
+        })
+
+        .then(resolve, reject);
+    };
+
+    // return promise
+    return new Promise((resolve, reject) => {
+      // check if db is already connected
+      if (this.isConnected) {
+        resolver(resolve, reject);
+        return; // exit
+      }
+
+      // wait for db connection
+      this.once('connect', () => {
+        resolver(resolve, reject);
+      });
+    })
+      .nodeify(callback);
+  }
+
+  /**
+   * Acquires the first available connection from the internal connection pool.
+   * @return {Promise<Connection>}
+   * @private
+   */
+  _acquireConnection() {
+    return new Promise((resolve, reject) => {
+      this._pool.getConnection((err, conn) => {
+        if (err) return reject(err);
+        resolve(conn);
+      });
+    };
+  }
+
+  /**
+   * Releases the designated client and restores it in the internal connection pool.
+   * @param {Connection} conn
+   * @private
+   */
+  _releaseConnection(conn) {
+    conn.release();
+  }
+
+  /**
+   * Runs the given parameterized SQL statement to the supplied db connection.
+   * @param {Connection} conn a db connection.
+   * @param {string} sql a parameterized SQL statement.
+   * @param {Array} [params] an array of parameter values.
+   * @param {Object} [options] query options.
+   * @return {Promise} resolving to the query results.
+   * @private
+   */
+  _queryConnection(conn, sql, params, options) {
+    // merge options with sql
+    options.sql = sql;
+
+    return new Promise((resolve, reject) => {
+      conn.query(options, (err, records) => {
+        if (err) return reject(err);
+
+        // handle SELECT statement response
+        if (_.isArray(records)) {
+          resolve(records);
+          return; // exit
+        }
+
+        // handle DML statement response
+        resolve({
+          insertId: records.insertId,
+          affectedRows: records.affectedRows
+        });
+      });
+    };
+  }
+
 }
 
 export default MySqlDatabase;
