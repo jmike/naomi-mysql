@@ -2,11 +2,20 @@
 
 import {assert} from 'chai';
 import Promise from 'bluebird';
+import Database from '../src/Database';
 import QueryBuilder from '../src/QueryBuilder';
 
 describe('QueryBuilder', function () {
   describe('#buildFind()', function () {
-    const builder = new QueryBuilder('employees');
+    const db = new Database({
+      host: process.env.MYSQL_HOST,
+      port: parseInt(process.env.MYSQL_PORT, 10),
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE
+    });
+    const employees = db.createCollection('employees');
+    const builder = new QueryBuilder(employees);
 
     it('accepts empty AST', function () {
       const query = builder.buildFind([]);
