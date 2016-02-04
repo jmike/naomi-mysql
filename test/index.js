@@ -12,7 +12,7 @@ const mocha = new Mocha({
 
 // load the test files
 mocha.addFile(path.resolve(__dirname, './database'));
-mocha.addFile(path.resolve(__dirname, './querybuilder'));
+mocha.addFile(path.resolve(__dirname, './querycompiler'));
 
 // run the tests
 mocha.run(function (failures) {
