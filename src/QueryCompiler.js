@@ -5,6 +5,14 @@ import {QueryCompiler} from 'naomi';
 class MySqlQueryCompiler extends QueryCompiler {
 
   /**
+   * Escapes and returns the supplied identifier.
+   * @type {string}
+   */
+  escape(identifier: string): string {
+    return `\`${identifier}\``;
+  }
+
+  /**
    * Compiles and returns a parameterized SQL KEY expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
@@ -14,7 +22,7 @@ class MySqlQueryCompiler extends QueryCompiler {
       throw new CustomError(`Invalid abstract syntax tree; expected "KEY", received ${ast[0]}`, 'QueryCompileException');
     }
 
-    const sql = `\`${ast[1]}\``;
+    const sql = this.escape(ast[1]);
     const params = [];
 
     return {sql, params};
@@ -459,21 +467,86 @@ class MySqlQueryCompiler extends QueryCompiler {
     return {params, sql: sql.join(', ')};
   }
 
-  buildFind(ast: Array): Object {
+  /**
+   * Compiles and returns a parameterized SQL LIMIT expression, based on the supplied AST.
+   * @param {Array} ast abstract syntax tree.
+   * @return {Object}
+   */
+  compileLimit(ast: Array): Object {
+    if (ast[0] !== 'LIMIT') {
+      throw new CustomError(`Invalid abstract syntax tree; expected "LIMIT", received ${ast[0]}`, 'QueryCompileException');
+    }
+
+    if (_.isNil(ast[1])) {
+      return {sql: '', params: []};
+    }
+
+    return {sql: ast[1].toString(), params: []};
+  }
+
+  /**
+   * Compiles and returns a parameterized SQL OFFSET expression, based on the supplied AST.
+   * @param {Array} ast abstract syntax tree.
+   * @return {Object}
+   */
+  compileOffset(ast: Array): Object {
+    if (ast[0] !== 'OFFSET') {
+      throw new CustomError(`Invalid abstract syntax tree; expected "OFFSET", received ${ast[0]}`, 'QueryCompileException');
+    }
+
+    if (_.isNil(ast[1])) {
+      return {sql: '', params: []};
+    }
+
+    return {sql: ast[1].toString(), params: []};
+  }
+
+  /**
+   * Compiles and returns a new "find" query, based on the supplied AST.
+   * @param {Object} ast abstract syntax tree.
+   * @return {Object}
+   */
+  compileFind(ast: Object): Object {
     const sql = [];
     let params = [];
 
-    sql.push('SELECT *');
-    sql.push('FROM', this.escape(this.collection.name));
+    sql.push('SELECT');
 
-    const filter = this._compile(ast);
+    const projection = this.compileProjection(ast.projection);
+    sql.push(projection.sql);
+    params = params.concat(projection.params);
 
-    if (filter.sql) {
-      sql.push('WHERE', filter.sql);
-      params = params.concat(filter.params);
+    sql.push('FROM', this.escape(this.collection));
+
+    const selection = this.compileSelection(ast.selection);
+
+    if (!_.isEmpty(selection.sql)) {
+      sql.push('WHERE', selection.sql);
+      params = params.concat(selection.params);
     }
 
-    return {params, sql: `${sql.join(' ')};`};
+    const orderby = this.compileOrderBy(ast.orderby);
+
+    if (!_.isEmpty(orderby.sql)) {
+      sql.push('ORDER BY', orderby.sql);
+      params = params.concat(orderby.params);
+    }
+
+    const limit = this.compileLimit(ast.limit);
+
+    if (!_.isEmpty(limit.sql)) {
+      sql.push('LIMIT', limit.sql);
+      params = params.concat(limit.params);
+
+      const offset = this.compileOffset(ast.offset);
+
+      if (!_.isEmpty(offset.sql)) {
+        sql.push('OFFSET', offset.sql);
+        params = params.concat(offset.params);
+      }
+    }
+
+    return {params, sql: sql.join(' ') + ';'};
   }
 
 }

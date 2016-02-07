@@ -266,6 +266,45 @@ describe('QueryCompiler', function () {
     });
   });
 
+  describe('#compileFind()', function () {
+    it('accepts AST with nil arguments', function () {
+      const query = builder.compileFind({
+        projection: ['PROJECTION', null],
+        selection: ['SELECTION', null],
+        orderby: ['ORDERBY', null],
+        limit: ['LIMIT', null],
+        offset: ['OFFSET', null]
+      });
+
+      assert.strictEqual(query.sql, 'SELECT `id`, `firstname`, `lastname`, `age` FROM `employees`;');
+      assert.deepEqual(query.params, []);
+    });
+
+    it('accepts AST with all arguments', function () {
+      const query = builder.compileFind({
+        projection: [
+          'PROJECTION',
+          ['INCLUDE', ['KEY', 'firstname']],
+          ['INCLUDE', ['KEY', 'lastname']]
+        ],
+        selection: [
+          'SELECTION',
+          ['EQ', ['KEY', 'age'], ['VALUE', 23]]
+        ],
+        orderby: [
+          'ORDERBY',
+          ['ASC', ['KEY', 'firstname']],
+          ['DESC', ['KEY', 'id']]
+        ],
+        limit: ['LIMIT', 10],
+        offset: ['OFFSET', 20]
+      });
+
+      assert.strictEqual(query.sql, 'SELECT `firstname`, `lastname` FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
+      assert.deepEqual(query.params, [23]);
+    });
+  });
+
   // describe('#buildFind()', function () {
   //   const db = new Database({
   //     host: process.env.MYSQL_HOST,
