@@ -415,7 +415,7 @@ class MySqlQueryCompiler extends QueryCompiler {
       throw new CustomError(`Invalid abstract syntax tree; expected "PROJECTION", received ${ast[0]}`, 'QueryCompileException');
     }
 
-    const included = [];
+    let included = [];
     const excluded = [];
 
     if (!_.isNil(ast[1])) {
@@ -439,8 +439,12 @@ class MySqlQueryCompiler extends QueryCompiler {
       });
     }
 
-    if (excluded.length === 0) {
+    if (excluded.length !== 0) {
       included = _.differenceWith(included, excluded, _.isEqual);
+
+      if (included.length === 0) {
+        throw new CustomError(`Invalid abstract syntax tree; "INCLUDE" and "EXCLUDE" directives cancel each other`, 'QueryCompileException');
+      }
     }
 
     const sql = [];
