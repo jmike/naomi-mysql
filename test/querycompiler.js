@@ -4,13 +4,13 @@ import {assert} from 'chai';
 import QueryCompiler from '../src/QueryCompiler';
 
 describe('QueryCompiler', function () {
-  const builder = new QueryCompiler('employees');
+  const builder = new QueryCompiler('employees', ['id', 'firstname', 'lastname', 'age']);
 
   describe('#compileKey()', function () {
     it('accepts valid AST', function () {
-      const query = builder.compileKey(['KEY', 'a']);
+      const query = builder.compileKey(['KEY', 'id']);
 
-      assert.strictEqual(query.sql, '`a`');
+      assert.strictEqual(query.sql, '`id`');
       assert.lengthOf(query.params, 0);
     });
   });
@@ -19,11 +19,11 @@ describe('QueryCompiler', function () {
     it('accepts valid AST', function () {
       const query = builder.compileOrderBy([
         'ORDERBY',
-        ['ASC', ['KEY', 'foo']],
-        ['DESC', ['KEY', 'bar']]
+        ['ASC', ['KEY', 'name']],
+        ['DESC', ['KEY', 'age']]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` ASC, `bar` DESC');
+      assert.strictEqual(query.sql, '`name` ASC, `age` DESC');
       assert.lengthOf(query.params, 0);
     });
   });
@@ -39,147 +39,147 @@ describe('QueryCompiler', function () {
     it('accepts AST containing $eq', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['EQ', ['KEY', 'foo'], ['VALUE', 123]]
+        ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` = ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` = ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $eq with null value', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['EQ', ['KEY', 'foo'], ['VALUE', null]]
+        ['EQ', ['KEY', 'age'], ['VALUE', null]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` IS NULL');
+      assert.strictEqual(query.sql, '`age` IS NULL');
       assert.deepEqual(query.params, []);
     });
 
     it('accepts AST containing $ne', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['NE', ['KEY', 'foo'], ['VALUE', 123]]
+        ['NE', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` != ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` != ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $ne with null value', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['NE', ['KEY', 'foo'], ['VALUE', null]]
+        ['NE', ['KEY', 'age'], ['VALUE', null]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` IS NOT NULL');
+      assert.strictEqual(query.sql, '`age` IS NOT NULL');
       assert.deepEqual(query.params, []);
     });
 
     it('accepts AST containing $gt', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['GT', ['KEY', 'foo'], ['VALUE', 123]]
+        ['GT', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` > ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` > ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $gte', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['GTE', ['KEY', 'foo'], ['VALUE', 123]]
+        ['GTE', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` >= ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` >= ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $lt', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['LT', ['KEY', 'foo'], ['VALUE', 123]]
+        ['LT', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` < ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` < ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $lte', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['LTE', ['KEY', 'foo'], ['VALUE', 123]]
+        ['LTE', ['KEY', 'age'], ['VALUE', 23]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` <= ?');
-      assert.deepEqual(query.params, [123]);
+      assert.strictEqual(query.sql, '`age` <= ?');
+      assert.deepEqual(query.params, [23]);
     });
 
     it('accepts AST containing $in', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['IN', ['KEY', 'foo'], ['VALUES', 1, 2, 3]]
+        ['IN', ['KEY', 'age'], ['VALUES', 20, 30, 40]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` IN (?, ?, ?)');
-      assert.deepEqual(query.params, [1, 2, 3]);
+      assert.strictEqual(query.sql, '`age` IN (?, ?, ?)');
+      assert.deepEqual(query.params, [20, 30, 40]);
     });
 
     it('accepts AST containing $nin', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['NIN', ['KEY', 'foo'], ['VALUES', 1, 2, 3]]
+        ['NIN', ['KEY', 'age'], ['VALUES', 20, 30, 40]]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` NOT IN (?, ?, ?)');
-      assert.deepEqual(query.params, [1, 2, 3]);
+      assert.strictEqual(query.sql, '`age` NOT IN (?, ?, ?)');
+      assert.deepEqual(query.params, [20, 30, 40]);
     });
 
     it('accepts AST containing $like', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['LIKE', ['KEY', 'foo'], ['VALUE', '%str']]
+        ['LIKE', ['KEY', 'firstname'], ['VALUE', '%ohn']]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` LIKE ?');
-      assert.deepEqual(query.params, ['%str']);
+      assert.strictEqual(query.sql, '`firstname` LIKE ?');
+      assert.deepEqual(query.params, ['%ohn']);
     });
 
     it('accepts AST containing $nlike', function () {
       const query = builder.compileSelection([
         'SELECTION',
-        ['NLIKE', ['KEY', 'foo'], ['VALUE', '%str']]
+        ['NLIKE', ['KEY', 'firstname'], ['VALUE', '%ohn']]
       ]);
 
-      assert.strictEqual(query.sql, '`foo` NOT LIKE ?');
-      assert.deepEqual(query.params, ['%str']);
+      assert.strictEqual(query.sql, '`firstname` NOT LIKE ?');
+      assert.deepEqual(query.params, ['%ohn']);
     });
 
     it('accepts AST containing $and', function () {
       const query = builder.compileSelection([
         'SELECTION',
         ['AND',
-          ['EQ', ['KEY', 'foo'], ['VALUE', 123]],
-          ['NE', ['KEY', 'bar'], ['VALUE', 'str']]
+          ['EQ', ['KEY', 'age'], ['VALUE', 23]],
+          ['NE', ['KEY', 'firstname'], ['VALUE', 'John']]
         ]
       ]);
 
-      assert.strictEqual(query.sql, '(`foo` = ?) AND (`bar` != ?)');
-      assert.deepEqual(query.params, [123, 'str']);
+      assert.strictEqual(query.sql, '(`age` = ?) AND (`firstname` != ?)');
+      assert.deepEqual(query.params, [23, 'John']);
     });
 
     it('accepts AST containing $or', function () {
       const query = builder.compileSelection([
         'SELECTION',
         ['OR',
-          ['EQ', ['KEY', 'foo'], ['VALUE', 123]],
-          ['NE', ['KEY', 'bar'], ['VALUE', 'str']]
+          ['EQ', ['KEY', 'age'], ['VALUE', 23]],
+          ['NE', ['KEY', 'firstname'], ['VALUE', 'John']]
         ]
       ]);
 
-      assert.strictEqual(query.sql, '(`foo` = ?) OR (`bar` != ?)');
-      assert.deepEqual(query.params, [123, 'str']);
+      assert.strictEqual(query.sql, '(`age` = ?) OR (`firstname` != ?)');
+      assert.deepEqual(query.params, [23, 'John']);
     });
 
     it('accepts AST containing $and with nested $or', function () {
@@ -187,15 +187,15 @@ describe('QueryCompiler', function () {
         'SELECTION',
         ['AND',
           ['OR',
-            ['EQ', ['KEY', 'foo'], ['VALUE', 1]],
-            ['EQ', ['KEY', 'foo'], ['VALUE', 2]]
+            ['EQ', ['KEY', 'age'], ['VALUE', 18]],
+            ['EQ', ['KEY', 'age'], ['VALUE', 23]]
           ],
-          ['NE', ['KEY', 'bar'], ['VALUE', 'str']]
+          ['NE', ['KEY', 'firstname'], ['VALUE', 'James']]
         ]
       ]);
 
-      assert.strictEqual(query.sql, '((`foo` = ?) OR (`foo` = ?)) AND (`bar` != ?)');
-      assert.deepEqual(query.params, [1, 2, 'str']);
+      assert.strictEqual(query.sql, '((`age` = ?) OR (`age` = ?)) AND (`firstname` != ?)');
+      assert.deepEqual(query.params, [18, 23, 'James']);
     });
   });
 
