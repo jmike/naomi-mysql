@@ -13,7 +13,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL KEY expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "key" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -29,7 +29,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL VALUE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "value" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -45,7 +45,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL VALUE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "values" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -66,7 +66,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL EQ expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "equal" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -92,7 +92,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL EQ expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "not equal" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -118,7 +118,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL GT expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "greater than" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -140,7 +140,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL GTE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "greater than or equal" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -162,7 +162,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL LT expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "less than" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -184,7 +184,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL LTE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "less than or equal" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -206,7 +206,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL IN expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "in" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -228,7 +228,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL NIN expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "not in" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -250,7 +250,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL LIKE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "like" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -272,7 +272,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL NLIKE expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "not like" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -294,7 +294,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL AND expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "and" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -316,7 +316,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL OR expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "or" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -338,7 +338,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL SELECTION clause, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "selection" clause, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -382,7 +382,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Builds and returns an orderby clause, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "order by" clause, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -414,7 +414,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL PROJECTION clause, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "projection" clause, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -468,7 +468,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL LIMIT expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "limit" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -485,7 +485,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL OFFSET expression, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "offset" expression, based on the supplied AST.
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
@@ -502,11 +502,16 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a new "find" query, based on the supplied AST.
+   * Compiles and returns a parameterized SQL "find" query, based on the supplied AST.
    * @param {Object} ast abstract syntax tree.
+   * @param {Array} ast.selection selection abstract syntax tree.
+   * @param {Array} ast.projection projection abstract syntax tree.
+   * @param {Array} ast.orderby order by abstract syntax tree.
+   * @param {Array} ast.limit limit abstract syntax tree.
+   * @param {Array} ast.offset offset abstract syntax tree.
    * @return {Object}
    */
-  compileFind(ast: Object): Object {
+  compileFind(ast: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
     const sql = [];
     let params = [];
 
@@ -544,6 +549,92 @@ class MySqlQueryCompiler extends QueryCompiler {
         sql.push('OFFSET', offset.sql);
         params = params.concat(offset.params);
       }
+    }
+
+    return {params, sql: sql.join(' ') + ';'};
+  }
+
+  /**
+   * Compiles and returns a parameterized SQL "count" query, based on the supplied AST.
+   * @param {Object} ast abstract syntax tree.
+   * @param {Array} ast.selection selection abstract syntax tree.
+   * @param {Array} ast.orderby order by abstract syntax tree.
+   * @param {Array} ast.limit limit abstract syntax tree.
+   * @param {Array} ast.offset offset abstract syntax tree.
+   * @return {Object}
+   */
+  compileCount(ast: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+    const sql = [];
+    let params = [];
+
+    sql.push('SELECT COUNT(*) AS `count`');
+    sql.push('FROM', this.escape(this.collection));
+
+    const selection = this.compileSelection(ast.selection);
+
+    if (!_.isEmpty(selection.sql)) {
+      sql.push('WHERE', selection.sql);
+      params = params.concat(selection.params);
+    }
+
+    const orderby = this.compileOrderBy(ast.orderby);
+
+    if (!_.isEmpty(orderby.sql)) {
+      sql.push('ORDER BY', orderby.sql);
+      params = params.concat(orderby.params);
+    }
+
+    const limit = this.compileLimit(ast.limit);
+
+    if (!_.isEmpty(limit.sql)) {
+      sql.push('LIMIT', limit.sql);
+      params = params.concat(limit.params);
+
+      const offset = this.compileOffset(ast.offset);
+
+      if (!_.isEmpty(offset.sql)) {
+        sql.push('OFFSET', offset.sql);
+        params = params.concat(offset.params);
+      }
+    }
+
+    return {params, sql: sql.join(' ') + ';'};
+  }
+
+  /**
+   * Compiles and returns a parameterized SQL "remove" query, based on the supplied AST.
+   * @param {Object} ast abstract syntax tree.
+   * @param {Array} ast.selection selection abstract syntax tree.
+   * @param {Array} ast.orderby order by abstract syntax tree.
+   * @param {Array} ast.limit limit abstract syntax tree.
+   * @return {Object}
+   * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
+   */
+  compileRemove(ast: {selection: Array, orderby: Array, limit: Array}): Object {
+    const sql = [];
+    let params = [];
+
+    sql.push('DELETE', 'FROM', this.escape(this.collection));
+
+    const selection = this.compileSelection(ast.selection);
+
+    if (!_.isEmpty(selection.sql)) {
+      sql.push('WHERE', selection.sql);
+      params = params.concat(selection.params);
+    }
+
+    const orderby = this.compileOrderBy(ast.orderby);
+
+    if (!_.isEmpty(orderby.sql)) {
+      sql.push('ORDER BY', orderby.sql);
+      params = params.concat(orderby.params);
+    }
+
+    const limit = this.compileLimit(ast.limit);
+
+    if (!_.isEmpty(limit.sql)) {
+      sql.push('LIMIT', limit.sql);
+      params = params.concat(limit.params);
     }
 
     return {params, sql: sql.join(' ') + ';'};

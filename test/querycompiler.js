@@ -280,7 +280,7 @@ describe('QueryCompiler', function () {
       assert.deepEqual(query.params, []);
     });
 
-    it('accepts AST with all arguments', function () {
+    it('accepts AST with projection, selection, order by, limit and offset', function () {
       const query = builder.compileFind({
         projection: [
           'PROJECTION',
@@ -301,6 +301,47 @@ describe('QueryCompiler', function () {
       });
 
       assert.strictEqual(query.sql, 'SELECT `firstname`, `lastname` FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
+      assert.deepEqual(query.params, [23]);
+    });
+  });
+
+  describe('#compileCount()', function () {
+    it('accepts AST with selection, order by, limit and offset', function () {
+      const query = builder.compileCount({
+        selection: [
+          'SELECTION',
+          ['EQ', ['KEY', 'age'], ['VALUE', 23]]
+        ],
+        orderby: [
+          'ORDERBY',
+          ['ASC', ['KEY', 'firstname']],
+          ['DESC', ['KEY', 'id']]
+        ],
+        limit: ['LIMIT', 10],
+        offset: ['OFFSET', 20]
+      });
+
+      assert.strictEqual(query.sql, 'SELECT COUNT(*) AS `count` FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
+      assert.deepEqual(query.params, [23]);
+    });
+  });
+
+  describe('#compileRemove()', function () {
+    it('accepts AST with selection, order by and limit', function () {
+      const query = builder.compileRemove({
+        selection: [
+          'SELECTION',
+          ['EQ', ['KEY', 'age'], ['VALUE', 23]]
+        ],
+        orderby: [
+          'ORDERBY',
+          ['ASC', ['KEY', 'firstname']],
+          ['DESC', ['KEY', 'id']]
+        ],
+        limit: ['LIMIT', 10]
+      });
+
+      assert.strictEqual(query.sql, 'DELETE FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10;');
       assert.deepEqual(query.params, [23]);
     });
   });
