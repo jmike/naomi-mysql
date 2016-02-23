@@ -70,7 +70,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileEq(ast: Array): Object {
+  compileEqual(ast: Array): Object {
     if (ast[0] !== 'EQ') {
       throw new CustomError(`Invalid abstract syntax tree; expected "EQ", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -96,7 +96,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileNe(ast: Array): Object {
+  compileNotEqual(ast: Array): Object {
     if (ast[0] !== 'NE') {
       throw new CustomError(`Invalid abstract syntax tree; expected "NE", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -122,7 +122,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileGt(ast: Array): Object {
+  compileGreaterThan(ast: Array): Object {
     if (ast[0] !== 'GT') {
       throw new CustomError(`Invalid abstract syntax tree; expected "GT", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -144,7 +144,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileGte(ast: Array): Object {
+  compileGreaterThanOrEqual(ast: Array): Object {
     if (ast[0] !== 'GTE') {
       throw new CustomError(`Invalid abstract syntax tree; expected "GTE", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -166,7 +166,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileLt(ast: Array): Object {
+  compileLessThan(ast: Array): Object {
     if (ast[0] !== 'LT') {
       throw new CustomError(`Invalid abstract syntax tree; expected "LT", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -188,7 +188,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileLte(ast: Array): Object {
+  compileLessThanOrEqual(ast: Array): Object {
     if (ast[0] !== 'LTE') {
       throw new CustomError(`Invalid abstract syntax tree; expected "LTE", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -232,7 +232,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileNin(ast: Array): Object {
+  compileNotIn(ast: Array): Object {
     if (ast[0] !== 'NIN') {
       throw new CustomError(`Invalid abstract syntax tree; expected "NIN", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -276,7 +276,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast abstract syntax tree.
    * @return {Object}
    */
-  compileNlike(ast: Array): Object {
+  compileNotLike(ast: Array): Object {
     if (ast[0] !== 'NLIKE') {
       throw new CustomError(`Invalid abstract syntax tree; expected "NLIKE", received ${ast[0]}`, 'QueryCompileException');
     }
@@ -353,25 +353,25 @@ class MySqlQueryCompiler extends QueryCompiler {
 
     switch (ast[1][0]) {
     case 'EQ':
-      return this.compileEq(ast[1]);
+      return this.compileEqual(ast[1]);
     case 'NE':
-      return this.compileNe(ast[1]);
+      return this.compileNotEqual(ast[1]);
     case 'GT':
-      return this.compileGt(ast[1]);
+      return this.compileGreaterThan(ast[1]);
     case 'GTE':
-      return this.compileGte(ast[1]);
+      return this.compileGreaterThanOrEqual(ast[1]);
     case 'LT':
-      return this.compileLt(ast[1]);
+      return this.compileLessThan(ast[1]);
     case 'LTE':
-      return this.compileLte(ast[1]);
+      return this.compileLessThanOrEqual(ast[1]);
     case 'IN':
       return this.compileIn(ast[1]);
     case 'NIN':
-      return this.compileNin(ast[1]);
+      return this.compileNotIn(ast[1]);
     case 'LIKE':
       return this.compileLike(ast[1]);
     case 'NLIKE':
-      return this.compileNlike(ast[1]);
+      return this.compileNotLike(ast[1]);
     case 'AND':
       return this.compileAnd(ast[1]);
     case 'OR':
@@ -442,7 +442,7 @@ class MySqlQueryCompiler extends QueryCompiler {
     }
 
     if (included.length === 0) {
-      included = this.properties.map((e) => {
+      included = this.schema.getColumnNames().map((e) => {
         return ['KEY', e];
       });
     }
@@ -511,7 +511,7 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast.offset offset abstract syntax tree.
    * @return {Object}
    */
-  compileFind(ast: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+  compileFindQuery(ast: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
     const sql = [];
     let params = [];
 
@@ -521,7 +521,7 @@ class MySqlQueryCompiler extends QueryCompiler {
     sql.push(projection.sql);
     params = params.concat(projection.params);
 
-    sql.push('FROM', this.escape(this.collection));
+    sql.push('FROM', this.escape(this.name));
 
     const selection = this.compileSelection(ast.selection);
 
@@ -563,12 +563,12 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @param {Array} ast.offset offset abstract syntax tree.
    * @return {Object}
    */
-  compileCount(ast: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+  compileCountQuery(ast: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
     const sql = [];
     let params = [];
 
     sql.push('SELECT COUNT(*) AS `count`');
-    sql.push('FROM', this.escape(this.collection));
+    sql.push('FROM', this.escape(this.name));
 
     const selection = this.compileSelection(ast.selection);
 
@@ -610,11 +610,11 @@ class MySqlQueryCompiler extends QueryCompiler {
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
-  compileRemove(ast: {selection: Array, orderby: Array, limit: Array}): Object {
+  compileRemoveQuery(ast: {selection: Array, orderby: Array, limit: Array}): Object {
     const sql = [];
     let params = [];
 
-    sql.push('DELETE', 'FROM', this.escape(this.collection));
+    sql.push('DELETE', 'FROM', this.escape(this.name));
 
     const selection = this.compileSelection(ast.selection);
 
@@ -638,6 +638,16 @@ class MySqlQueryCompiler extends QueryCompiler {
     }
 
     return {params, sql: sql.join(' ') + ';'};
+  }
+
+  /**
+   * Compiles and returns a parameterized SQL "insert" query, based on the supplied AST.
+   * @param {Object} ast abstract syntax tree.
+   * @return {Object}
+   * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
+   */
+  compileInsertQuery(ast: Object) {
+    throw new CustomError('Method not implemented', 'NotImplementedException');
   }
 
 }

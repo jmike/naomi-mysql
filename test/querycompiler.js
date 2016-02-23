@@ -2,9 +2,15 @@
 
 import {assert} from 'chai';
 import QueryCompiler from '../src/QueryCompiler';
+import {Schema} from 'naomi';
 
 describe('QueryCompiler', function () {
-  const builder = new QueryCompiler('employees', ['id', 'firstname', 'lastname', 'age']);
+  const builder = new QueryCompiler('employees', new Schema({
+    'id': {type: 'integer'},
+    'firstname': {type: 'string'},
+    'lastname': {type: 'string'},
+    'age': {type: 'integer'}
+  }));
 
   describe('#compileKey()', function () {
     it('accepts valid AST', function () {
@@ -266,9 +272,9 @@ describe('QueryCompiler', function () {
     });
   });
 
-  describe('#compileFind()', function () {
+  describe('#compileFindQuery()', function () {
     it('accepts AST with nil arguments', function () {
-      const query = builder.compileFind({
+      const query = builder.compileFindQuery({
         projection: ['PROJECTION', null],
         selection: ['SELECTION', null],
         orderby: ['ORDERBY', null],
@@ -281,7 +287,7 @@ describe('QueryCompiler', function () {
     });
 
     it('accepts AST with projection, selection, order by, limit and offset', function () {
-      const query = builder.compileFind({
+      const query = builder.compileFindQuery({
         projection: [
           'PROJECTION',
           ['INCLUDE', ['KEY', 'firstname']],
@@ -305,9 +311,9 @@ describe('QueryCompiler', function () {
     });
   });
 
-  describe('#compileCount()', function () {
+  describe('#compileCountQuery()', function () {
     it('accepts AST with selection, order by, limit and offset', function () {
-      const query = builder.compileCount({
+      const query = builder.compileCountQuery({
         selection: [
           'SELECTION',
           ['EQ', ['KEY', 'age'], ['VALUE', 23]]
@@ -326,9 +332,9 @@ describe('QueryCompiler', function () {
     });
   });
 
-  describe('#compileRemove()', function () {
+  describe('#compileRemoveQuery()', function () {
     it('accepts AST with selection, order by and limit', function () {
-      const query = builder.compileRemove({
+      const query = builder.compileRemoveQuery({
         selection: [
           'SELECTION',
           ['EQ', ['KEY', 'age'], ['VALUE', 23]]
