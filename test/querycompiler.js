@@ -359,8 +359,17 @@ describe('QueryCompiler', function () {
         {firstname: 'Will', lastname: 'Turner', age: 27}
       ]);
 
-      assert.strictEqual(query.sql, 'INSERT INTO `employees` (`firstname`, `lastname`, `age`) VALUES (?, ?, ?), (?, ?, ?);');
-      assert.deepEqual(query.params, ['Jack', 'Sparrow', 34, 'Will', 'Turner', 27]);
+      assert.strictEqual(query.sql, 'INSERT INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?), (?, ?, ?, ?);');
+      assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34, undefined, 'Will', 'Turner', 27]);
+    });
+
+    it('accepts records with ignore option', function () {
+      const query = builder.compileInsertQuery([
+        {firstname: 'Jack', lastname: 'Sparrow', age: 34}
+      ], {ignore: true});
+
+      assert.strictEqual(query.sql, 'INSERT IGNORE INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?);');
+      assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34]);
     });
   });
 });

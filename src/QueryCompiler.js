@@ -660,7 +660,7 @@ class MySqlQueryCompiler extends QueryCompiler {
     sql.push('INTO', this.escape(this.name));
 
     const keys = this.schema.getColumnNames();
-    const columns = keys.map((e) => escape(e)).join(', ');
+    const columns = keys.map((e) => this.escape(e)).join(', ');
 
     sql.push(`(${columns})`);
 
