@@ -503,47 +503,47 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "find" query, based on the supplied AST.
-   * @param {Object} ast abstract syntax tree.
-   * @param {Array} ast.selection selection abstract syntax tree.
-   * @param {Array} ast.projection projection abstract syntax tree.
-   * @param {Array} ast.orderby order by abstract syntax tree.
-   * @param {Array} ast.limit limit abstract syntax tree.
-   * @param {Array} ast.offset offset abstract syntax tree.
+   * @param {Object} props query properties.
+   * @param {Array} props.selection selection abstract syntax tree.
+   * @param {Array} props.projection projection abstract syntax tree.
+   * @param {Array} props.orderby order by abstract syntax tree.
+   * @param {Array} props.limit limit abstract syntax tree.
+   * @param {Array} props.offset offset abstract syntax tree.
    * @return {Object}
    */
-  compileFindQuery(ast: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+  compileFindQuery(props: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
     const sql = [];
     let params = [];
 
     sql.push('SELECT');
 
-    const projection = this.compileProjection(ast.projection);
+    const projection = this.compileProjection(props.projection);
     sql.push(projection.sql);
     params = params.concat(projection.params);
 
     sql.push('FROM', this.escape(this.name));
 
-    const selection = this.compileSelection(ast.selection);
+    const selection = this.compileSelection(props.selection);
 
     if (!_.isEmpty(selection.sql)) {
       sql.push('WHERE', selection.sql);
       params = params.concat(selection.params);
     }
 
-    const orderby = this.compileOrderBy(ast.orderby);
+    const orderby = this.compileOrderBy(props.orderby);
 
     if (!_.isEmpty(orderby.sql)) {
       sql.push('ORDER BY', orderby.sql);
       params = params.concat(orderby.params);
     }
 
-    const limit = this.compileLimit(ast.limit);
+    const limit = this.compileLimit(props.limit);
 
     if (!_.isEmpty(limit.sql)) {
       sql.push('LIMIT', limit.sql);
       params = params.concat(limit.params);
 
-      const offset = this.compileOffset(ast.offset);
+      const offset = this.compileOffset(props.offset);
 
       if (!_.isEmpty(offset.sql)) {
         sql.push('OFFSET', offset.sql);
@@ -556,41 +556,41 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "count" query, based on the supplied AST.
-   * @param {Object} ast abstract syntax tree.
-   * @param {Array} ast.selection selection abstract syntax tree.
-   * @param {Array} ast.orderby order by abstract syntax tree.
-   * @param {Array} ast.limit limit abstract syntax tree.
-   * @param {Array} ast.offset offset abstract syntax tree.
+   * @param {Object} props query properties.
+   * @param {Array} props.selection selection abstract syntax tree.
+   * @param {Array} props.orderby order by abstract syntax tree.
+   * @param {Array} props.limit limit abstract syntax tree.
+   * @param {Array} props.offset offset abstract syntax tree.
    * @return {Object}
    */
-  compileCountQuery(ast: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+  compileCountQuery(props: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
     const sql = [];
     let params = [];
 
     sql.push('SELECT COUNT(*) AS `count`');
     sql.push('FROM', this.escape(this.name));
 
-    const selection = this.compileSelection(ast.selection);
+    const selection = this.compileSelection(props.selection);
 
     if (!_.isEmpty(selection.sql)) {
       sql.push('WHERE', selection.sql);
       params = params.concat(selection.params);
     }
 
-    const orderby = this.compileOrderBy(ast.orderby);
+    const orderby = this.compileOrderBy(props.orderby);
 
     if (!_.isEmpty(orderby.sql)) {
       sql.push('ORDER BY', orderby.sql);
       params = params.concat(orderby.params);
     }
 
-    const limit = this.compileLimit(ast.limit);
+    const limit = this.compileLimit(props.limit);
 
     if (!_.isEmpty(limit.sql)) {
       sql.push('LIMIT', limit.sql);
       params = params.concat(limit.params);
 
-      const offset = this.compileOffset(ast.offset);
+      const offset = this.compileOffset(props.offset);
 
       if (!_.isEmpty(offset.sql)) {
         sql.push('OFFSET', offset.sql);
@@ -603,34 +603,34 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "remove" query, based on the supplied AST.
-   * @param {Object} ast abstract syntax tree.
-   * @param {Array} ast.selection selection abstract syntax tree.
-   * @param {Array} ast.orderby order by abstract syntax tree.
-   * @param {Array} ast.limit limit abstract syntax tree.
+   * @param {Object} props query properties.
+   * @param {Array} props.selection selection abstract syntax tree.
+   * @param {Array} props.orderby order by abstract syntax tree.
+   * @param {Array} props.limit limit abstract syntax tree.
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
-  compileRemoveQuery(ast: {selection: Array, orderby: Array, limit: Array}): Object {
+  compileRemoveQuery(props: {selection: Array, orderby: Array, limit: Array}): Object {
     const sql = [];
     let params = [];
 
     sql.push('DELETE', 'FROM', this.escape(this.name));
 
-    const selection = this.compileSelection(ast.selection);
+    const selection = this.compileSelection(props.selection);
 
     if (!_.isEmpty(selection.sql)) {
       sql.push('WHERE', selection.sql);
       params = params.concat(selection.params);
     }
 
-    const orderby = this.compileOrderBy(ast.orderby);
+    const orderby = this.compileOrderBy(props.orderby);
 
     if (!_.isEmpty(orderby.sql)) {
       sql.push('ORDER BY', orderby.sql);
       params = params.concat(orderby.params);
     }
 
-    const limit = this.compileLimit(ast.limit);
+    const limit = this.compileLimit(props.limit);
 
     if (!_.isEmpty(limit.sql)) {
       sql.push('LIMIT', limit.sql);
@@ -642,12 +642,44 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "insert" query, based on the supplied AST.
-   * @param {Object} ast abstract syntax tree.
+   * @param {Array<Object>} records an array of records to insert.
+   * @param {Object} options query options.
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
-  compileInsertQuery(ast: Object) {
-    throw new CustomError('Method not implemented', 'NotImplementedException');
+  compileInsertQuery(records: Array<Object>, options = {}: Object): Object {
+    const sql = [];
+    const params = [];
+
+    sql.push('INSERT');
+
+    if (options.ignore === true) {
+      sql.push('IGNORE');
+    }
+
+    sql.push('INTO', this.escape(this.name));
+
+    const keys = this.schema.getColumnNames();
+    const columns = keys.map((e) => escape(e)).join(', ');
+
+    sql.push(`(${columns})`);
+
+    const values = records
+      .map((e) => {
+        const group = keys
+          .map(function (k) {
+            params.push(e[k]);
+            return '?';
+          })
+          .join(', ');
+
+        return `(${group})`;
+      })
+      .join(', ');
+
+    sql.push('VALUES', values);
+
+    return {params, sql: sql.join(' ') + ';'};
   }
 
 }
