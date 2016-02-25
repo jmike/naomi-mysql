@@ -273,7 +273,7 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileFindQuery()', function () {
-    it('accepts AST with nil arguments', function () {
+    it('accepts ASTs with nil arguments', function () {
       const query = builder.compileFindQuery({
         projection: ['PROJECTION', null],
         selection: ['SELECTION', null],
@@ -370,6 +370,18 @@ describe('QueryCompiler', function () {
 
       assert.strictEqual(query.sql, 'INSERT IGNORE INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?);');
       assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34]);
+    });
+  });
+
+  describe('#compileUpsertQuery()', function () {
+    it('accepts records', function () {
+      const query = builder.compileUpsertQuery([
+        {firstname: 'Jack', lastname: 'Sparrow', age: 34},
+        {firstname: 'Will', lastname: 'Turner', age: 27}
+      ]);
+
+      assert.strictEqual(query.sql, 'INSERT INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?), (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `firstname` = VALUES(`firstname`), `lastname` = VALUES(`lastname`), `age` = VALUES(`age`);');
+      assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34, undefined, 'Will', 'Turner', 27]);
     });
   });
 });
