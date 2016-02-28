@@ -524,12 +524,12 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "find" query.
-   * @param {Object} $query a collection of ASTs, as given by the QueryParser.
-   * @param {Array} $query.selection selection abstract syntax tree.
-   * @param {Array} $query.projection projection abstract syntax tree.
-   * @param {Array} $query.orderby order by abstract syntax tree.
-   * @param {Array} $query.limit limit abstract syntax tree.
-   * @param {Array} $query.offset offset abstract syntax tree.
+   * @param {Object} $query query properties.
+   * @param {Array} $query.selection selection AST as provided by the QueryParser.
+   * @param {Array} $query.projection projection AST as provided by the QueryParser.
+   * @param {Array} $query.orderby orderby AST as provided by the QueryParser.
+   * @param {Array} $query.limit limit AST as provided by the QueryParser.
+   * @param {Array} $query.offset offset AST as provided by the QueryParser.
    * @return {Object}
    */
   compileFindQuery($query: {selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
@@ -577,11 +577,11 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "count" query.
-   * @param {Object} $query a collection of ASTs, as given by the QueryParser.
-   * @param {Array} $query.selection selection abstract syntax tree.
-   * @param {Array} $query.orderby order by abstract syntax tree.
-   * @param {Array} $query.limit limit abstract syntax tree.
-   * @param {Array} $query.offset offset abstract syntax tree.
+   * @param {Object} $query query properties.
+   * @param {Array} $query.selection selection AST as provided by the QueryParser.
+   * @param {Array} $query.orderby orderby AST as provided by the QueryParser.
+   * @param {Array} $query.limit limit AST as provided by the QueryParser.
+   * @param {Array} $query.offset offset AST as provided by the QueryParser.
    * @return {Object}
    */
   compileCountQuery($query: {selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
@@ -624,10 +624,10 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "remove" query.
-   * @param {Object} $query a collection of ASTs, as given by the QueryParser.
-   * @param {Array} $query.selection selection abstract syntax tree.
-   * @param {Array} $query.orderby order by abstract syntax tree.
-   * @param {Array} $query.limit limit abstract syntax tree.
+   * @param {Object} $query query properties.
+   * @param {Array} $query.selection selection AST as provided by the QueryParser.
+   * @param {Array} $query.orderby orderby AST as provided by the QueryParser.
+   * @param {Array} $query.limit limit AST as provided by the QueryParser.
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
@@ -663,18 +663,19 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "insert" query.
-   * @param {Array<Object>} records an array of records.
-   * @param {Object} options query options.
+   * @param {Object} $query query properties.
+   * @param {Array<Object>} $query.records an array of records to insert.
+   * @param {boolean} [$query.ignore=false] whether to compile an "INSERT IGNORE" query.
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
-  compileInsertQuery(records: Array<Object>, options = {}: Object): Object {
+  compileInsertQuery($query: {records: Array<Object>, ignore: ?boolean}): Object {
     const sql = [];
     const params = [];
 
     sql.push('INSERT');
 
-    if (options.ignore === true) {
+    if ($query.ignore === true) {
       sql.push('IGNORE');
     }
 
@@ -685,7 +686,7 @@ class MySqlQueryCompiler extends QueryCompiler {
 
     sql.push(`(${columns})`);
 
-    const values = records
+    const values = $query.records
       .map((e) => {
         const group = keys
           .map(function (k) {
@@ -705,12 +706,12 @@ class MySqlQueryCompiler extends QueryCompiler {
 
   /**
    * Compiles and returns a parameterized SQL "insert" query.
-   * @param {Array<Object>} records an array of records.
-   * @param {Object} options query options.
+   * @param {Object} $query query properties.
+   * @param {Array<Object>} $query.records an array of records to upsert.
    * @return {Object}
    * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
    */
-  compileUpsertQuery(records: Array<Object>, options = {}: Object): Object {
+  compileUpsertQuery($query: {records: Array<Object>}): Object {
     const sql = [];
     const params = [];
 
@@ -721,7 +722,7 @@ class MySqlQueryCompiler extends QueryCompiler {
 
     sql.push(`(${columns})`);
 
-    const values = records
+    const values = $query.records
       .map((e) => {
         const group = keys
           .map(function (k) {
