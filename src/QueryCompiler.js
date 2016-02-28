@@ -637,6 +637,7 @@ class MySqlQueryCompiler extends QueryCompiler {
 
     sql.push('DELETE', 'FROM', this.escape(this.name));
 
+    // compile + append WHERE clause
     const selection = this.compileSelection($query.selection);
 
     if (!_.isEmpty(selection.sql)) {
@@ -644,6 +645,7 @@ class MySqlQueryCompiler extends QueryCompiler {
       params = params.concat(selection.params);
     }
 
+    // compile + append ORDER BY clause
     const orderby = this.compileOrderBy($query.orderby);
 
     if (!_.isEmpty(orderby.sql)) {
@@ -651,6 +653,7 @@ class MySqlQueryCompiler extends QueryCompiler {
       params = params.concat(orderby.params);
     }
 
+    // compile + append LIMIT clause
     const limit = this.compileLimit($query.limit);
 
     if (!_.isEmpty(limit.sql)) {
@@ -705,7 +708,7 @@ class MySqlQueryCompiler extends QueryCompiler {
   }
 
   /**
-   * Compiles and returns a parameterized SQL "insert" query.
+   * Compiles and returns a parameterized SQL "insert ... on duplicate key update" query.
    * @param {Object} $query query properties.
    * @param {Array<Object>} $query.records an array of records to upsert.
    * @return {Object}
@@ -746,6 +749,59 @@ class MySqlQueryCompiler extends QueryCompiler {
       .join(', ');
 
     sql.push('ON DUPLICATE KEY UPDATE', updateValues);
+
+    return {params, sql: sql.join(' ') + ';'};
+  }
+
+  /**
+   * Compiles and returns a parameterized SQL "update" query.
+   * @param {Object} $query query properties.
+   * @param {Object} $query.values a object of values to set in the updated records.
+   * @param {Array} $query.selection selection AST as provided by the QueryParser.
+   * @param {Array} $query.orderby orderby AST as provided by the QueryParser.
+   * @param {Array} $query.limit limit AST as provided by the QueryParser.
+   * @return {Object}
+   * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
+   */
+  compileUpdateQuery($query: {values: Object, selection: Array, orderby: Array, limit: Array}): Object {
+    const sql = [];
+    let params = [];
+
+    sql.push('UPDATE', this.escape(this.name));
+
+    // compile + append SET VALUES clause
+    const values = _.keys($query.values)
+      .map((k) => {
+        params.push($query.values[k]);
+        return `${this.escape(k)} = ?`;
+      })
+      .join(', ');
+
+    sql.push('SET', values);
+
+    // compile + append WHERE clause
+    const selection = this.compileSelection($query.selection);
+
+    if (!_.isEmpty(selection.sql)) {
+      sql.push('WHERE', selection.sql);
+      params = params.concat(selection.params);
+    }
+
+    // compile + append ORDER BY clause
+    const orderby = this.compileOrderBy($query.orderby);
+
+    if (!_.isEmpty(orderby.sql)) {
+      sql.push('ORDER BY', orderby.sql);
+      params = params.concat(orderby.params);
+    }
+
+    // compile + append LIMIT clause
+    const limit = this.compileLimit($query.limit);
+
+    if (!_.isEmpty(limit.sql)) {
+      sql.push('LIMIT', limit.sql);
+      params = params.concat(limit.params);
+    }
 
     return {params, sql: sql.join(' ') + ';'};
   }

@@ -273,7 +273,7 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileFindQuery()', function () {
-    it('accepts ASTs with nil arguments', function () {
+    it('accepts $query with null projection, selection, orderby, limit and offset', function () {
       const query = builder.compileFindQuery({
         projection: ['PROJECTION', null],
         selection: ['SELECTION', null],
@@ -286,7 +286,7 @@ describe('QueryCompiler', function () {
       assert.deepEqual(query.params, []);
     });
 
-    it('accepts AST with projection, selection, order by, limit and offset', function () {
+    it('accepts $query with projection, selection, orderby, limit and offset', function () {
       const query = builder.compileFindQuery({
         projection: [
           'PROJECTION',
@@ -312,7 +312,7 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileCountQuery()', function () {
-    it('accepts AST with selection, order by, limit and offset', function () {
+    it('accepts $query with selection, orderby, limit and offset', function () {
       const query = builder.compileCountQuery({
         selection: [
           'SELECTION',
@@ -333,7 +333,7 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileRemoveQuery()', function () {
-    it('accepts AST with selection, order by and limit', function () {
+    it('accepts $query with selection, orderby and limit', function () {
       const query = builder.compileRemoveQuery({
         selection: [
           'SELECTION',
@@ -353,20 +353,25 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileInsertQuery()', function () {
-    it('accepts records', function () {
-      const query = builder.compileInsertQuery([
-        {firstname: 'Jack', lastname: 'Sparrow', age: 34},
-        {firstname: 'Will', lastname: 'Turner', age: 27}
-      ]);
+    it('accepts $query with records', function () {
+      const query = builder.compileInsertQuery({
+        records: [
+          {firstname: 'Jack', lastname: 'Sparrow', age: 34},
+          {firstname: 'Will', lastname: 'Turner', age: 27}
+        ]
+      });
 
       assert.strictEqual(query.sql, 'INSERT INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?), (?, ?, ?, ?);');
       assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34, undefined, 'Will', 'Turner', 27]);
     });
 
-    it('accepts records with ignore option', function () {
-      const query = builder.compileInsertQuery([
-        {firstname: 'Jack', lastname: 'Sparrow', age: 34}
-      ], {ignore: true});
+    it('accepts $query with records and optional ignore set as true', function () {
+      const query = builder.compileInsertQuery({
+        records: [
+          {firstname: 'Jack', lastname: 'Sparrow', age: 34}
+        ],
+        ignore: true
+      });
 
       assert.strictEqual(query.sql, 'INSERT IGNORE INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?);');
       assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34]);
@@ -374,14 +379,39 @@ describe('QueryCompiler', function () {
   });
 
   describe('#compileUpsertQuery()', function () {
-    it('accepts records', function () {
-      const query = builder.compileUpsertQuery([
-        {firstname: 'Jack', lastname: 'Sparrow', age: 34},
-        {firstname: 'Will', lastname: 'Turner', age: 27}
-      ]);
+    it('accepts $query with records', function () {
+      const query = builder.compileUpsertQuery({
+        records: [
+          {firstname: 'Jack', lastname: 'Sparrow', age: 34},
+          {firstname: 'Will', lastname: 'Turner', age: 27}
+        ]
+      });
 
       assert.strictEqual(query.sql, 'INSERT INTO `employees` (`id`, `firstname`, `lastname`, `age`) VALUES (?, ?, ?, ?), (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `firstname` = VALUES(`firstname`), `lastname` = VALUES(`lastname`), `age` = VALUES(`age`);');
       assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34, undefined, 'Will', 'Turner', 27]);
+    });
+  });
+
+  describe('#compileUpdateQuery()', function () {
+    it('accepts $query with records, selection, orderby and limit', function () {
+      const query = builder.compileUpdateQuery({
+        values: {
+          age: 35
+        },
+        selection: [
+          'SELECTION',
+          ['EQ', ['KEY', 'lastname'], ['VALUE', 'Sparrow']]
+        ],
+        orderby: [
+          'ORDERBY',
+          ['ASC', ['KEY', 'firstname']],
+          ['DESC', ['KEY', 'id']]
+        ],
+        limit: ['LIMIT', 10]
+      });
+
+      assert.strictEqual(query.sql, 'UPDATE `employees` SET `age` = ? WHERE `lastname` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10;');
+      assert.deepEqual(query.params, [35, 'Sparrow']);
     });
   });
 });
