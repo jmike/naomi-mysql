@@ -30,6 +30,7 @@ class MySqlDatabase extends Database {
 
     super(connectionProperties);
 
+    this.name = connectionProperties.database;
     this._pool = null;
   }
 
