@@ -32,34 +32,27 @@ class MySqlCollection extends Collection {
   reverseEngineer(callback: ?Function): Promise {
     const sql = `
       SELECT
+        \`ORDINAL_POSITION\`,
         \`COLUMN_NAME\`,
         \`DATA_TYPE\`,
+        \`COLUMN_TYPE\`,
+        \`CHARACTER_MAXIMUM_LENGTH\`,
+        \`NUMERIC_PRECISION\`,
+        \`NUMERIC_SCALE\`,
+        \`DATETIME_PRECISION\`
         \`IS_NULLABLE\`,
         \`EXTRA\`,
         \`COLUMN_DEFAULT\`,
+        \`CHARACTER_SET_NAME\`,
         \`COLLATION_NAME\`,
-        \`COLUMN_COMMENT\`,
-        \`ORDINAL_POSITION\`
+        \`COLUMN_COMMENT\`
       FROM information_schema.COLUMNS
       WHERE \`TABLE_SCHEMA\` = ? AND \`TABLE_NAME\` = ?
       ORDER BY \`ORDINAL_POSITION\` ASC;
     `;
     const params = [this.db.name, this.name];
 
-    const re = /auto_increment/i;
-
     return this.db.query(sql, params)
-      .map((record) => {
-        return {
-          name: record.COLUMN_NAME,
-          type: record.DATA_TYPE,
-          isNullable: record.IS_NULLABLE === 'YES',
-          isAutoInc: re.test(record.EXTRA),
-          default: record.COLUMN_DEFAULT,
-          collation: record.COLLATION_NAME,
-          comment: (record.COLUMN_COMMENT === '') ? null : record.COLUMN_COMMENT
-        };
-      })
       .then((metadata) => {
         return Schema.fromMetadata(metadata);
       })
