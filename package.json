@@ -49,6 +49,7 @@
     "customerror": "^1.0.1",
     "lodash": "^4.2.0",
     "mysql": "^2.10.0",
+    "naomi": "^2.0.0-alpha.2",
     "type-of": "^2.0.1"
   }
 }
