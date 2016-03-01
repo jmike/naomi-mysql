@@ -2,7 +2,7 @@
   "name": "naomi-mysql",
   "version": "2.0.0-alpha.1",
   "description": "MySQL connector for Naomi ORM",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "node test/index.js"
   },
