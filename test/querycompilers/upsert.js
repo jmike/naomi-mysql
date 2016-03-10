@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileUpsertQuery from '../../src/compilers/upsert';
+import compileUpsertQuery from '../../src/querycompilers/upsert';
 
 describe('Upsert query compiler', function () {
   it('accepts props with table, columns and records', function () {

@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileFindQuery from '../../src/compilers/find';
+import compileFindQuery from '../../src/querycompilers/find';
 
 describe('Find query compiler', function () {
   it('accepts props with table + empty projection, selection, orderby, limit and offset', function () {

@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileKey from '../../src/compilers/key';
+import compileKey from '../../src/querycompilers/key';
 
 describe('Key compiler', function () {
   it('accepts valid AST', function () {

@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileUpdateQuery from '../../src/compilers/update';
+import compileUpdateQuery from '../../src/querycompilers/update';
 
 describe('Update query compiler', function () {
   it('accepts props with table, records, selection, orderby and limit', function () {

@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileProjection from '../../src/compilers/projection';
+import compileProjection from '../../src/querycompilers/projection';
 
 describe('Projection compiler', function () {
   it('accepts AST with nil arguments', function () {

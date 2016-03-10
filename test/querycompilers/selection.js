@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileSelection from '../../src/compilers/selection';
+import compileSelection from '../../src/querycompilers/selection';
 
 describe('Selection compiler', function () {
   it('accepts AST with nil arguments', function () {

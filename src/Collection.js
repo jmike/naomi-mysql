@@ -3,12 +3,12 @@ import Promise from 'bluebird';
 import type from 'type-of';
 import Collection from 'naomi/src/Collection';
 import Schema from './Schema';
-import compileFindQuery from './compilers/find';
-import compileCountQuery from './compilers/count';
-import compileInsertQuery from './compilers/insert';
-import compileUpsertQuery from './compilers/upsert';
-import compileUpdateQuery from './compilers/update';
-import compileRemoveQuery from './compilers/remove';
+import compileFindQuery from './querycompilers/find';
+import compileCountQuery from './querycompilers/count';
+import compileInsertQuery from './querycompilers/insert';
+import compileUpsertQuery from './querycompilers/upsert';
+import compileUpdateQuery from './querycompilers/update';
+import compileRemoveQuery from './querycompilers/remove';
 
 class MySqlCollection extends Collection {
 

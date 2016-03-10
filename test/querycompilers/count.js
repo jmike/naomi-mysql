@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileCountQuery from '../../src/compilers/count';
+import compileCountQuery from '../../src/querycompilers/count';
 
 describe('Count query compiler', function () {
   it('accepts props with table, selection, orderby, limit and offset', function () {

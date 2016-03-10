@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileInsertQuery from '../../src/compilers/insert';
+import compileInsertQuery from '../../src/querycompilers/insert';
 
 describe('Insert query compiler', function () {
   it('accepts props with table, columns and records', function () {

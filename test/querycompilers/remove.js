@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileRemoveQuery from '../../src/compilers/remove';
+import compileRemoveQuery from '../../src/querycompilers/remove';
 
 describe('Remove query compiler', function () {
   it('accepts props with table, selection, orderby and limit', function () {

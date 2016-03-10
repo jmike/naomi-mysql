@@ -12,16 +12,16 @@ const mocha = new Mocha({
 
 // load the test files
 mocha.addFile(path.resolve(__dirname, './database'));
-mocha.addFile(path.resolve(__dirname, './compilers/key'));
-mocha.addFile(path.resolve(__dirname, './compilers/selection'));
-mocha.addFile(path.resolve(__dirname, './compilers/projection'));
-mocha.addFile(path.resolve(__dirname, './compilers/orderby'));
-mocha.addFile(path.resolve(__dirname, './compilers/find'));
-mocha.addFile(path.resolve(__dirname, './compilers/count'));
-mocha.addFile(path.resolve(__dirname, './compilers/remove'));
-mocha.addFile(path.resolve(__dirname, './compilers/insert'));
-mocha.addFile(path.resolve(__dirname, './compilers/upsert'));
-mocha.addFile(path.resolve(__dirname, './compilers/update'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/key'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/selection'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/projection'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/orderby'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/find'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/count'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/remove'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/insert'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/upsert'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/update'));
 
 // run the tests
 mocha.run(function (failures) {

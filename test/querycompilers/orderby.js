@@ -1,7 +1,7 @@
 /* global describe, it, before, after */
 
 import {assert} from 'chai';
-import compileOrderBy from '../../src/compilers/orderBy';
+import compileOrderBy from '../../src/querycompilers/orderBy';
 
 describe('OrderBy compiler', function () {
   it('accepts valid AST', function () {
