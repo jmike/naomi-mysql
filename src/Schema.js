@@ -1,4 +1,5 @@
-import {Schema} from 'naomi';
+import _ from 'lodash';
+import Schema from 'naomi/src/Schema';
 
 class MySqlSchema extends Schema {
 

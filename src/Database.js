@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import mysql from 'mysql';
 import type from 'type-of';
-import {Database} from 'naomi';
+import Database from 'naomi/src/Database';
 
 class MySqlDatabase extends Database {
 
