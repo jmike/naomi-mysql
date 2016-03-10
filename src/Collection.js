@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Promise from 'bluebird';
+import Promise from 'bluebird'; // eslint-disable-line
 import type from 'type-of';
 import Collection from 'naomi/src/Collection';
 import Schema from './Schema';
