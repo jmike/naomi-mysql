@@ -197,7 +197,7 @@ class MySqlCollection extends Collection {
       records,
       ignore: options.ignore,
       table: this.name,
-      columns: this.schema.getColumnNames(),
+      columns: this.schema.keys(),
     });
 
     // run statement
@@ -229,7 +229,7 @@ class MySqlCollection extends Collection {
     const query = compileUpsertQuery({
       records,
       table: this.name,
-      columns: this.schema.getColumnNames(),
+      columns: this.schema.keys(),
     });
 
     // run statement
@@ -304,9 +304,7 @@ class MySqlCollection extends Collection {
     const params = [this.db.name, this.name];
 
     return this.db.query(sql, params)
-      .then((metadata) => {
-        return Schema.fromMetadata(metadata);
-      })
+      .then((metadata) => Schema.fromMetadata(metadata))
       .nodeify(callback);
   }
 
