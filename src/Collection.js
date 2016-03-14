@@ -178,7 +178,7 @@ class MySqlCollection extends Collection {
   insert(records: Object | Array<Object>, options: Object | ?Function, callback: ?Function): Promise {
     // validate arguments
     if (_.isPlainObject(records)) {
-      records = [records];
+      records = [records]; // make sure records is array
     } else if (!_.isArray(records)) {
       throw new TypeError(`Invalid records argument; exprected object or array, received ${type(records)}`);
     }
@@ -194,7 +194,7 @@ class MySqlCollection extends Collection {
       ignore: false
     });
 
-    // validate records values
+    // validate records
     return Promise.map(records, (record) => this.schema.validate(record))
 
       // compile parameterized SQL query
@@ -223,7 +223,9 @@ class MySqlCollection extends Collection {
    */
   upsert(records: Object, options: Object | ?Function, callback: ?Function): Promise {
     // validate arguments
-    if (!_.isPlainObject(records) && !_.isArray(records)) {
+    if (_.isPlainObject(records)) {
+      records = [records]; // make sure records is array
+    } else if (!_.isArray(records)) {
       throw new TypeError(`Invalid records argument; exprected object or array, received ${type(records)}`);
     }
 
@@ -233,15 +235,22 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // compile parameterized SQL query
-    const query = compileUpsertQuery({
-      records,
-      table: this.name,
-      columns: this.schema.keys(),
-    });
+    // validate records
+    return Promise.map(records, (record) => this.schema.validate(record))
 
-    // run statement
-    return this.db.query(query.sql, query.params)
+      // compile parameterized SQL query
+      .then((values) => {
+        return compileUpsertQuery({
+          values,
+          table: this.name,
+          columns: this.schema.keys(),
+          updateColumns: _.difference(this.schema.keys(), this.schema.primaryKeys())
+        });
+      })
+
+      // execute query
+      .then((query) => this.db.query(query.sql, query.params))
+
       .nodeify(callback);
   }
 

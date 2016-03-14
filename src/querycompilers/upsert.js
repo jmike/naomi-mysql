@@ -4,11 +4,13 @@ import escapeIdentifier from './escape';
  * Compiles and returns a parameterized SQL "insert ... on duplicate key update" query.
  * @param {Object} props query properties.
  * @param {string} props.table the name of the table.
- * @param {Array<Object>} props.records an array of records to upsert.
+ * @param {Array<string>} props.columns the columns of the table.
+ * @param {Array<string>} props.updateColumns the columns to update on duplicate key.
+ * @param {Array<Object>} props.values an array of records to upsert to table.
  * @return {Object}
  * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
  */
-function compile(props: {table: string, columns: Array<string>, records: Array<Object>}): Object {
+function compile(props: {table: string, columns: Array<string>, updateColumns: Array<string>, values: Array<Object>}): Object {
   const sql = [];
   const params = [];
 
@@ -17,11 +19,11 @@ function compile(props: {table: string, columns: Array<string>, records: Array<O
   const columns = props.columns.map((e) => escapeIdentifier(e)).join(', ');
   sql.push(`(${columns})`);
 
-  const values = props.records
-    .map((e) => {
+  const values = props.values
+    .map((obj) => {
       const group = props.columns
-        .map(function (k) {
-          params.push(e[k]);
+        .map((k) => {
+          params.push(obj[k]);
           return '?';
         })
         .join(', ');
@@ -32,14 +34,14 @@ function compile(props: {table: string, columns: Array<string>, records: Array<O
 
   sql.push('VALUES', values);
 
-  const updateValues = props.columns
+  const updateColumns = props.updateColumns
     .map((k) => {
       k = escapeIdentifier(k);
       return `${k} = VALUES(${k})`;
     })
     .join(', ');
 
-  sql.push('ON DUPLICATE KEY UPDATE', updateValues);
+  sql.push('ON DUPLICATE KEY UPDATE', updateColumns);
 
   return {params, sql: sql.join(' ') + ';'};
 }
