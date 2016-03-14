@@ -4,12 +4,13 @@ import escapeIdentifier from './escape';
  * Compiles and returns a parameterized SQL "insert" query.
  * @param {Object} props query properties.
  * @param {string} props.table the name of the table.
- * @param {Array<Object>} props.records an array of records to insert.
- * @param {boolean} [props.ignore=false] whether to compile an "INSERT IGNORE" query.
+ * @param {Array<string>} props.columns the columns of the table.
+ * @param {Array<Object>} props.values an array of values to insert to table.
+ * @param {boolean} props.ignore returns "INSERT IGNORE" if set to true.
  * @return {Object}
  * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
  */
-function compile(props: {table: string, columns: Array<string>, records: Array<Object>, ignore: ?boolean}): Object {
+function compile(props: {table: string, columns: Array<string>, values: Array<Object>, ignore: boolean}): Object {
   const sql = [];
   const params = [];
 
@@ -24,10 +25,10 @@ function compile(props: {table: string, columns: Array<string>, records: Array<O
   const columns = props.columns.map((e) => escapeIdentifier(e)).join(', ');
   sql.push(`(${columns})`);
 
-  const values = props.records
+  const values = props.values
     .map((e) => {
       const group = props.columns
-        .map(function (k) {
+        .map((k) => {
           params.push(e[k]);
           return '?';
         })

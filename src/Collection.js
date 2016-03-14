@@ -200,10 +200,10 @@ class MySqlCollection extends Collection {
       // compile parameterized SQL query
       .then((values) => {
         return compileInsertQuery({
-          records: values,
-          ignore: options.ignore,
+          values,
           table: this.name,
           columns: this.schema.keys(),
+          ignore: options.ignore === true,
         });
       })
 
