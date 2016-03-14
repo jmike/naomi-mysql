@@ -175,9 +175,11 @@ class MySqlCollection extends Collection {
    * @returns {Promise} a bluebird promise resolving to the primary key of the created record(s).
    * @throws {TypeError} if arguments are of invalid type.
    */
-  insert(records: Object, options: Object | ?Function, callback: ?Function): Promise {
+  insert(records: Object | Array<Object>, options: Object | ?Function, callback: ?Function): Promise {
     // validate arguments
-    if (!_.isPlainObject(records) && !_.isArray(records)) {
+    if (_.isPlainObject(records)) {
+      records = [records];
+    } else if (!_.isArray(records)) {
       throw new TypeError(`Invalid records argument; exprected object or array, received ${type(records)}`);
     }
 
@@ -187,21 +189,27 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // handle default options
+    // set default options
     options = _.defaults(options, {
       ignore: false
     });
 
-    // compile parameterized SQL query
-    const query = compileInsertQuery({
-      records,
-      ignore: options.ignore,
-      table: this.name,
-      columns: this.schema.keys(),
-    });
+    // validate records values
+    return Promise.map(records, (record) => this.schema.validate(record))
 
-    // run statement
-    return this.db.query(query.sql, query.params)
+      // compile parameterized SQL query
+      .then((values) => {
+        return compileInsertQuery({
+          records: values,
+          ignore: options.ignore,
+          table: this.name,
+          columns: this.schema.keys(),
+        });
+      })
+
+      // execute query
+      .then((query) => this.db.query(query.sql, query.params))
+
       .nodeify(callback);
   }
 
