@@ -8,7 +8,7 @@ function transpile(meta: Object): Object {
   const props = {type: 'string'};
 
   props.nullable = meta.IS_NULLABLE === 'YES';
-  props.minLength = meta.CHARACTER_MAXIMUM_LENGTH;
+  props.maxLength = meta.CHARACTER_MAXIMUM_LENGTH;
 
   if (meta.COLUMN_DEFAULT !== null) {
     props.default = meta.COLUMN_DEFAULT;
