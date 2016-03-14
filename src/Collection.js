@@ -268,7 +268,7 @@ class MySqlCollection extends Collection {
   update(selection: boolean | number | string | ?Object, values: Object, options: ?Object, callback: ?Function): Promise {
     // validate arguments
     if (!_.isPlainObject(values)) {
-      throw new TypeError(`Invalid values argument; exprected object, received ${type(values)}`);
+      throw new TypeError(`Invalid values argument; exprected plain object, received ${type(values)}`);
     }
 
     // handle optional arguments
@@ -277,17 +277,23 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // compile parameterized SQL query
-    const query = compileUpdateQuery({
-      values,
-      table: this.name,
-      selection: this.parseSelection(selection),
-      orderby: this.parseOrderBy(options.orderby),
-      limit: this.parseLimit(1),
-    });
+    // validate records
+    return Promise.map(values, (record) => this.schema.validate(record))
 
-    // run statement
-    return this.db.query(query.sql, query.params)
+      // compile parameterized SQL query
+      .then((values) => {
+        return compileUpdateQuery({
+          values,
+          table: this.name,
+          selection: this.parseSelection(selection),
+          orderby: this.parseOrderBy(options.orderby),
+          limit: this.parseLimit(1),
+        });
+      })
+
+      // execute query
+      .then((query) => this.db.query(query.sql, query.params))
+
       .nodeify(callback);
   }
 
