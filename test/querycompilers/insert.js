@@ -8,7 +8,7 @@ describe('Insert query compiler', function () {
     const query = compileInsertQuery({
       table: 'employees',
       columns: ['id', 'firstname', 'lastname', 'age'],
-      records: [
+      values: [
         {firstname: 'Jack', lastname: 'Sparrow', age: 34},
         {firstname: 'Will', lastname: 'Turner', age: 27}
       ]
@@ -22,7 +22,7 @@ describe('Insert query compiler', function () {
     const query = compileInsertQuery({
       table: 'employees',
       columns: ['id', 'firstname', 'lastname', 'age'],
-      records: [
+      values: [
         {firstname: 'Jack', lastname: 'Sparrow', age: 34}
       ],
       ignore: true

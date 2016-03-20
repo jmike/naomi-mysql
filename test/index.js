@@ -11,7 +11,6 @@ const mocha = new Mocha({
 });
 
 // load the test files
-mocha.addFile(path.resolve(__dirname, './database'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/key'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/selection'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/projection'));
@@ -22,6 +21,8 @@ mocha.addFile(path.resolve(__dirname, './querycompilers/remove'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/insert'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/upsert'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/update'));
+mocha.addFile(path.resolve(__dirname, './database'));
+mocha.addFile(path.resolve(__dirname, './collection'));
 
 // run the tests
 mocha.run(function (failures) {
