@@ -1,2 +1,2 @@
-import traspile from './float';
+import transpile from './float';
 export default transpile;

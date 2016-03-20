@@ -1,2 +1,2 @@
-import traspile from './varbinary';
+import transpile from './varbinary';
 export default transpile;

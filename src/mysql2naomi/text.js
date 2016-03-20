@@ -1,2 +1,2 @@
-import traspile from './varchar';
+import transpile from './varchar';
 export default transpile;

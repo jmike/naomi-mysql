@@ -1,2 +1,2 @@
-import traspile from './enum';
+import transpile from './enum';
 export default transpile;
