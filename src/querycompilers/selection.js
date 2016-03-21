@@ -1,17 +1,281 @@
 import _ from 'lodash';
 import CustomError from 'customerror';
-import compileEqual from './equal';
-import compileNotEqual from './notEqual';
-import compileGreaterThan from './greaterThan';
-import compileGreaterThanOrEqual from './greaterThanOrEqual';
-import compileLessThan from './lessThan';
-import compileLessThanOrEqual from './lessThanOrEqual';
-import compileIn from './in';
-import compileNotIn from './notIn';
-import compileLike from './like';
-import compileNotLike from './notLike';
-import compileAnd from './and';
-import compileOr from './or';
+import compileKey from './key';
+
+/**
+ * Compiles and returns a parameterized SQL "value" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileValue(ast: Array): Object {
+  const sql = '?';
+  const params = [ast[1]];
+
+  return {params, sql};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "values" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileValues(ast: Array): Object {
+  const sql = [];
+  const params = [];
+
+  _.tail(ast).forEach((e) => {
+    sql.push('?');
+    params.push(e);
+  });
+
+  return {params, sql: '(' + sql.join(', ') + ')'};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "equal" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileEqual(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  if (value.params[0] === null) {
+    sql.push('IS NULL');
+  } else {
+    sql.push('=', value.sql);
+    params = params.concat(value.params);
+  }
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "not equal" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileNotEqual(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  if (value.params[0] === null) {
+    sql.push('IS NOT NULL');
+  } else {
+    sql.push('!=', value.sql);
+    params = params.concat(value.params);
+  }
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "greater than" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileGreaterThan(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('>', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "greater than or equal" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileGreaterThanOrEqual(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('>=', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "less than" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileLessThan(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('<', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "less than or equal" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileLessThanOrEqual(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('<=', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "in" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileIn(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const values = compileValues(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('IN', values.sql);
+  params = params.concat(values.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "not in" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileNotIn(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const values = compileValues(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('NOT IN', values.sql);
+  params = params.concat(values.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "like" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileLike(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('LIKE', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "not like" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileNotLike(ast: Array): Object {
+  const key = compileKey(ast[1]);
+  const value = compileValue(ast[2]);
+
+  const sql = [key.sql];
+  let params = key.params;
+
+  sql.push('NOT LIKE', value.sql);
+  params = params.concat(value.params);
+
+  return {params, sql: sql.join(' ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "and" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileAnd(ast: Array): Object {
+  if (ast[0] !== 'AND') {
+    throw new TypeError(`Invalid AST; expected "AND" function, received "${ast[0]}"`);
+  }
+
+  const sql = [];
+  let params = [];
+
+  _.tail(ast).forEach((e) => {
+    const expr = compile(['SELECT', e]); // eslint-disable-line no-use-before-define
+    sql.push('(' + expr.sql + ')');
+    params = params.concat(expr.params);
+  });
+
+  return {params, sql: sql.join(' AND ')};
+}
+
+/**
+ * Compiles and returns a parameterized SQL "or" expression, based on the supplied AST.
+ * @param {Array} ast abstract syntax tree, as given by the QueryParser.
+ * @return {Object}
+ * @private
+ */
+function compileOr(ast: Array): Object {
+  if (ast[0] !== 'OR') {
+    throw new TypeError(`Invalid AST; expected "OR" function, received "${ast[0]}"`);
+  }
+
+  const sql = [];
+  let params = [];
+
+  _.tail(ast).forEach((e) => {
+    const expr = compile(['SELECT', e]); // eslint-disable-line no-use-before-define
+    sql.push('(' + expr.sql + ')');
+    params = params.concat(expr.params);
+  });
+
+  return {params, sql: sql.join(' OR ')};
+}
 
 /**
  * Compiles and returns a parameterized SQL "selection" clause, based on the supplied AST.
@@ -19,8 +283,8 @@ import compileOr from './or';
  * @return {Object}
  */
 function compile(ast: Array): Object {
-  if (ast[0] !== 'SELECTION') {
-    throw new CustomError(`Invalid abstract syntax tree; expected "SELECTION", received ${ast[0]}`, 'QueryCompileException');
+  if (ast[0] !== 'SELECT') {
+    throw new TypeError(`Invalid AST; expected "SELECT" function, received "${ast[0]}"`);
   }
 
   if (_.isNil(ast[1])) {
@@ -53,7 +317,7 @@ function compile(ast: Array): Object {
   case 'OR':
     return compileOr(ast[1]);
   default:
-    throw new CustomError(`Invalid abstract syntax tree; unknown identifier: ${ast[0]}`, 'QueryCompileException');
+    throw new CustomError(`Invalid AST; unknown identifier: ${ast[0]}`, 'QueryCompileException');
   }
 }
 
