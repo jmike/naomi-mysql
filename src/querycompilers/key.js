@@ -7,8 +7,9 @@ import escapeIdentifier from './escape';
  * @return {Object}
  */
 function compile(ast: Array): Object {
+  // make sure AST function is valid
   if (ast[0] !== 'KEY') {
-    throw new CustomError(`Invalid abstract syntax tree; expected "KEY", received ${ast[0]}`, 'QueryCompileException');
+    throw new CustomError(`Invalid AST; expected "KEY", received "${ast[0]}"`, 'QueryCompileException');
   }
 
   const sql = escapeIdentifier(ast[1]);

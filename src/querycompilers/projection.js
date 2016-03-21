@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import CustomError from 'customerror';
 import compileKey from './key';
 
 /**
@@ -8,49 +7,27 @@ import compileKey from './key';
  * @return {Object}
  */
 function compile(ast: Array): Object {
-  if (ast[0] !== 'PROJECTION') {
-    throw new CustomError(`Invalid abstract syntax tree; expected "PROJECTION", received ${ast[0]}`, 'QueryCompileException');
+  // make sure AST function is valid
+  if (ast[0] !== 'PROJECT') {
+    throw new TypeError(`Invalid AST; expected "PROJECT" function, received "${ast[0]}"`);
   }
 
-  let included = [];
-  const excluded = [];
-
-  if (!_.isNil(ast[1])) {
-    _.tail(ast).forEach((e) => {
-      switch (e[0]) {
-      case 'INCLUDE':
-        included.push(e[1]);
-        break;
-      case 'EXCLUDE':
-        excluded.push(e[1]);
-        break;
-      default:
-        throw new CustomError(`Invalid abstract syntax tree; expected "INCLUDE" or "EXCLUDE", received ${ast[0]}`, 'QueryCompileException');
-      }
-    });
-  }
-
-  if (included.length === 0) {
-    included = this.schema.getColumnNames().map((e) => {
-      return ['KEY', e];
-    });
-  }
-
-  if (excluded.length !== 0) {
-    included = _.differenceWith(included, excluded, _.isEqual);
-
-    if (included.length === 0) {
-      throw new CustomError(`Invalid abstract syntax tree; "INCLUDE" and "EXCLUDE" directives cancel each other`, 'QueryCompileException');
-    }
+  // handle null argument
+  if (_.isNil(ast[1])) {
+    return {sql: '*', params: []};
   }
 
   const sql = [];
   let params = [];
 
-  included.forEach((e) => {
+  _.tail(ast).forEach((e) => {
     const key = compileKey(e);
+
     sql.push(key.sql);
-    params = params.concat(params);
+
+    if (key.params.length !== 0) {
+      params = params.concat(key.params);
+    }
   });
 
   return {params, sql: sql.join(', ')};

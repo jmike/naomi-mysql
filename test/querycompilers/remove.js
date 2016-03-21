@@ -8,7 +8,7 @@ describe('Remove query compiler', function () {
     const query = compileRemoveQuery({
       table: 'employees',
       selection: [
-        'SELECTION',
+        'SELECT',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ],
       orderby: [

@@ -7,14 +7,14 @@ describe('Find query compiler', function () {
   it('accepts props with table + empty projection, selection, orderby, limit and offset', function () {
     const query = compileFindQuery({
       table: 'employees',
-      projection: ['PROJECTION', null],
-      selection: ['SELECTION', null],
+      projection: ['PROJECT', null],
+      selection: ['SELECT', null],
       orderby: ['ORDERBY', null],
       limit: ['LIMIT', null],
       offset: ['OFFSET', null]
     });
 
-    assert.strictEqual(query.sql, 'SELECT `id`, `firstname`, `lastname`, `age` FROM `employees`;');
+    assert.strictEqual(query.sql, 'SELECT * FROM `employees`;');
     assert.deepEqual(query.params, []);
   });
 
@@ -22,12 +22,12 @@ describe('Find query compiler', function () {
     const query = compileFindQuery({
       table: 'employees',
       projection: [
-        'PROJECTION',
-        ['INCLUDE', ['KEY', 'firstname']],
-        ['INCLUDE', ['KEY', 'lastname']]
+        'PROJECT',
+        ['KEY', 'firstname'],
+        ['KEY', 'lastname']
       ],
       selection: [
-        'SELECTION',
+        'SELECT',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ],
       orderby: [

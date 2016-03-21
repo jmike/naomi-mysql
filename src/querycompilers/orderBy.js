@@ -8,28 +8,32 @@ import compileKey from './key';
  * @return {Object}
  */
 function compile(ast: Array): Object {
+  // make sure AST function is valid
+  if (ast[0] !== 'ORDERBY') {
+    throw new TypeError(`Invalid AST; expected "ORDERBY", received "${ast[0]}"`);
+  }
+
+  // handle null argument
+  if (_.isNil(ast[1])) {
+    return {sql: '', params: []};
+  }
+
   const sql = [];
   let params = [];
 
-  if (ast[0] !== 'ORDERBY') {
-    throw new CustomError(`Invalid abstract syntax tree; expected "ORDERBY", received ${ast[0]}`, 'QueryCompileException');
-  }
-
-  if (!_.isNil(ast[1])) {
-    _.tail(ast).forEach((arr) => {
-      if (arr[0] === 'DESC') {
-        const key = compileKey(arr[1]);
-        sql.push(`${key.sql} DESC`);
-        params = params.concat(key.params);
-      } else if (arr[0] === 'ASC') {
-        const key = compileKey(arr[1]);
-        sql.push(`${key.sql} ASC`);
-        params = params.concat(key.params);
-      } else {
-        throw new CustomError(`Invalid abstract syntax tree; expected "ASC" or "DESC", received ${ast[0]}`, 'QueryCompileException');
-      }
-    });
-  }
+  _.tail(ast).forEach((arr) => {
+    if (arr[0] === 'DESC') {
+      const key = compileKey(arr[1]);
+      sql.push(`${key.sql} DESC`);
+      params = params.concat(key.params);
+    } else if (arr[0] === 'ASC') {
+      const key = compileKey(arr[1]);
+      sql.push(`${key.sql} ASC`);
+      params = params.concat(key.params);
+    } else {
+      throw new TypeError(`Invalid AST; expected "ASC" or "DESC", received "${ast[0]}"`);
+    }
+  });
 
   return {params, sql: sql.join(', ')};
 }

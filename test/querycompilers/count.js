@@ -8,7 +8,7 @@ describe('Count query compiler', function () {
     const query = compileCountQuery({
       table: 'employees',
       selection: [
-        'SELECTION',
+        'SELECT',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ],
       orderby: [
