@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 import mysql from 'mysql';
 import type from 'type-of';
 import Database from 'naomi/src/Database';
+import MySqlCollection from './Collection';
 
 class MySqlDatabase extends Database {
 
@@ -32,6 +33,7 @@ class MySqlDatabase extends Database {
 
     this.name = connectionProperties.database;
     this._pool = null;
+    this.Collection = MySqlCollection.bind(null, this);
   }
 
   /**
