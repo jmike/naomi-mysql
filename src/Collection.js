@@ -40,6 +40,13 @@ class MySqlCollection extends Collection {
    * @throws {ProjectionParseError} if selection is invalid
    */
   validateProjection(ast: Array): Array {
+    // handle nil arguments
+    if (_.isNil(ast[1])) {
+      const projection = _.chain(this.schema.keys()).map((k) => [k, 1]).fromPairs().value();
+      return this.parseProjection(projection);
+    }
+
+    // extract projection keys
     const keys = extractKeys(ast);
 
     // make sure projection keys exist in schema
@@ -100,6 +107,8 @@ class MySqlCollection extends Collection {
     if (_.isFunction(options)) {
       callback = options;
       options = {};
+    } else if (_.isUndefined(options)) {
+      options = {};
     }
 
     // parse input
@@ -138,6 +147,8 @@ class MySqlCollection extends Collection {
 
     if (_.isFunction(options)) {
       callback = options;
+      options = {};
+    } else if (_.isUndefined(options)) {
       options = {};
     }
 
@@ -180,6 +191,8 @@ class MySqlCollection extends Collection {
     if (_.isFunction(options)) {
       callback = options;
       options = {};
+    } else if (_.isUndefined(options)) {
+      options = {};
     }
 
     // parse input
@@ -218,6 +231,8 @@ class MySqlCollection extends Collection {
 
     if (_.isFunction(options)) {
       callback = options;
+      options = {};
+    } else if (_.isUndefined(options)) {
       options = {};
     }
 
@@ -258,6 +273,8 @@ class MySqlCollection extends Collection {
     // handle optional arguments
     if (_.isFunction(options)) {
       callback = options;
+      options = {};
+    } else if (_.isUndefined(options)) {
       options = {};
     }
 
@@ -311,9 +328,12 @@ class MySqlCollection extends Collection {
    * @returns {Promise} a bluebird promise resolving to the primary key of the created record(s).
    * @throws {TypeError} if arguments are of invalid type.
    */
-  upsert(records: Object, options: Object | ?Function, callback: ?Function): Promise {
+  upsert(records: Object | Array<Object>, options: Object | ?Function, callback: ?Function): Promise {
+    let isRecordsObject = false;
+
     // validate arguments
     if (_.isPlainObject(records)) {
+      isRecordsObject = true;
       records = [records]; // make sure records is array
     } else if (!_.isArray(records)) {
       throw new TypeError(`Invalid records argument; exprected object or array, received ${type(records)}`);
@@ -322,6 +342,8 @@ class MySqlCollection extends Collection {
     // handle optional arguments
     if (_.isFunction(options)) {
       callback = options;
+      options = {};
+    } else if (_.isUndefined(options)) {
       options = {};
     }
 
@@ -345,7 +367,7 @@ class MySqlCollection extends Collection {
         const autoinc = this.schema.hasAutoIncPrimaryKey();
         let insertedRows = 0;
 
-        return records.map((record, i) => {
+        return records.map((record) => {
           // check if record contains primary key
           const containsPrimaryKey = this.schema.primaryKey().every((k) => {
             return record.hasOwnProperty(k);
@@ -401,10 +423,14 @@ class MySqlCollection extends Collection {
     if (_.isFunction(options)) {
       callback = options;
       options = {};
+    } else if (_.isUndefined(options)) {
+      options = {};
     }
 
     // validate values
-    return this.schema.validate(values)
+    return Promise.resolve()
+
+      .then(() => this.schema.validate(values))
 
       // parse input + compile query
       .then((attrs) => {
@@ -419,22 +445,31 @@ class MySqlCollection extends Collection {
       // execute query
       .then((query) => this.db.query(query.sql, query.params))
 
-      // compile find query
-      .then(() => {
-        const collection = ['COLLECTION', ['KEY', this.name]];
-        const selection = this.validateSelection(this.parseSelection($query));
-        const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
-        const limit = this.parseLimit(options.limit);
-        const offset = this.parseOffset(null);
+      // // compile find query
+      // .then(() => {
+      //   const collection = ['COLLECTION', ['KEY', this.name]];
+      //   const projection = this.validateProjection(['PROJECTION', null]);
+      //   const selection = this.validateSelection(this.parseSelection($query));
+      //   const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+      //   const limit = this.parseLimit(options.limit);
+      //   const offset = this.parseOffset(null);
 
-        const query = compileFindQuery({collection, selection, projection, orderby, limit, offset});
-      })
+      //   return compileFindQuery({collection, selection, projection, orderby, limit, offset});
+      // })
 
-      // execute find query
-      .then((query) => this.db.query(query.sql, query.params))
+      // // execute find query
+      // .then((query) => {
+      //   console.log(query);
+      //   return this.db.query(query.sql, query.params);
+      // })
 
-      // return record indices in db
-      .map((record) => _.pick(record, this.schema.primaryKey()))
+      // // return record indices in db
+      // .map((record) => _.pick(record, this.schema.primaryKey()))
+
+      // .then((results) => {
+      //   console.log(results);
+      //   return results;
+      // })
 
       .nodeify(callback);
   }

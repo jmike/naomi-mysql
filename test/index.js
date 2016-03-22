@@ -19,10 +19,10 @@ mocha.addFile(path.resolve(__dirname, './querycompilers/find'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/count'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/remove'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/insert'));
-// mocha.addFile(path.resolve(__dirname, './querycompilers/upsert'));
-// mocha.addFile(path.resolve(__dirname, './querycompilers/update'));
-// mocha.addFile(path.resolve(__dirname, './database'));
-// mocha.addFile(path.resolve(__dirname, './collection'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/upsert'));
+mocha.addFile(path.resolve(__dirname, './querycompilers/update'));
+mocha.addFile(path.resolve(__dirname, './database'));
+mocha.addFile(path.resolve(__dirname, './collection'));
 
 // run the tests
 mocha.run(function (failures) {
