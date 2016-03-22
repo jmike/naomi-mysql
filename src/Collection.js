@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird'; // eslint-disable-line
 import type from 'type-of';
+import CustomError from 'customerror';
 import Collection from 'naomi/src/Collection';
 import Schema from './Schema';
 import compileFindQuery from './querycompilers/find';
@@ -9,12 +10,76 @@ import compileInsertQuery from './querycompilers/insert';
 import compileUpsertQuery from './querycompilers/upsert';
 import compileUpdateQuery from './querycompilers/update';
 import compileRemoveQuery from './querycompilers/remove';
+import extractKeys from './utils/extractKeysFromAST';
 
 class MySqlCollection extends Collection {
 
   /**
+   * Validates the given selection AST against the collection schema.
+   * @param {Array} ast
+   * @return {Array}
+   * @throws {SelectionParseError} if selection is invalid
+   */
+  validateSelection(ast: Array): Array {
+    const keys = extractKeys(ast);
+
+    // make sure selection keys exist in schema
+    keys.forEach((k) => {
+      if (!this.schema.has(k)) {
+        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'SelectionParseError');
+      }
+    });
+
+    return ast;
+  }
+
+  /**
+   * Validates the given projection AST against the collection schema.
+   * @param {Array} ast
+   * @return {Array}
+   * @throws {ProjectionParseError} if selection is invalid
+   */
+  validateProjection(ast: Array): Array {
+    const keys = extractKeys(ast);
+
+    // make sure projection keys exist in schema
+    keys.forEach((k) => {
+      if (!this.schema.has(k)) {
+        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'ProjectionParseError');
+      }
+    });
+
+    // invert negative projection
+    if (ast[0] === 'NPROJECTION') {
+      const projection = _.chain(keys).xor(this.schema.keys()).map((k) => [k, 1]).fromPairs().value();
+      return this.parseProjection(projection);
+    }
+
+    return ast;
+  }
+
+  /**
+   * Validates the given orderby AST against the collection schema.
+   * @param {Array} ast
+   * @return {Array}
+   * @throws {OrderByParseError} if selection is invalid
+   */
+  validateOrderBy(ast: Array): Array {
+    const keys = extractKeys(ast);
+
+    // make sure selection keys exist in schema
+    keys.forEach((k) => {
+      if (!this.schema.has(k)) {
+        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'OrderByParseError');
+      }
+    });
+
+    return ast;
+  }
+
+  /**
    * Retrieves designated records from the collection.
-   * @param {(boolean|number|string|Date|Object|Array<Object>)} selection a naomi selection expression.
+   * @param {(boolean|number|string|Date|Object|Array<Object>)} [$query] a naomi query object.
    * @param {Object} [options] query options.
    * @param {Object} [options.projection] a naomi projection expression.
    * @param {(string, Object, Array<string, Object)} [options.orderby] a naomi orderby expression.
@@ -24,11 +89,11 @@ class MySqlCollection extends Collection {
    * @returns {Promise<Array<Object>>} a bluebird promise resolving to an array of records.
    * @throws {TypeError} if arguments are of invalid type.
    */
-  find(selection: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
+  find($query: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
     // handle optional arguments
-    if (_.isFunction(selection)) {
-      callback = selection;
-      selection = undefined;
+    if (_.isFunction($query)) {
+      callback = $query;
+      $query = undefined;
       options = {};
     }
 
@@ -37,15 +102,16 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
+    // parse input
+    const collection = ['COLLECTION', ['KEY', this.name]];
+    const selection = this.validateSelection(this.parseSelection($query));
+    const projection = this.validateProjection(this.parseProjection(options.projection));
+    const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+    const limit = this.parseLimit(options.limit);
+    const offset = this.parseOffset(options.offset);
+
     // compile parameterized SQL query
-    const query = compileFindQuery({
-      table: this.name,
-      selection: this.parseSelection(selection),
-      projection: this.parseProjection(options.projection),
-      orderby: this.parseOrderBy(options.orderby),
-      limit: this.parseLimit(options.limit),
-      offset: this.parseOffset(options.offset),
-    });
+    const query = compileFindQuery({collection, selection, projection, orderby, limit, offset});
 
     // run statement
     return this.db.query(query.sql, query.params)
@@ -54,7 +120,7 @@ class MySqlCollection extends Collection {
 
   /**
    * Retrieves a single designated record from the collection.
-   * @param {(boolean|number|string|Date|Object|Array<Object>)} selection an optional naomi selection expression.
+   * @param {(boolean|number|string|Date|Object|Array<Object>)} [$query] a naomi query object.
    * @param {Object} [options] query options.
    * @param {Object} [options.projection] a naomi projection expression.
    * @param {(string, Object, Array<string, Object)} [options.orderby] a naomi orderby expression.
@@ -62,11 +128,11 @@ class MySqlCollection extends Collection {
    * @returns {Promise<Object>} a bluebird promise resolving to a single record.
    * @throws {TypeError} if arguments are of invalid type.
    */
-  findOne(selection: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
+  findOne($query: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
     // handle optional arguments
-    if (_.isFunction(selection)) {
-      callback = selection;
-      selection = undefined;
+    if (_.isFunction($query)) {
+      callback = $query;
+      $query = undefined;
       options = {};
     }
 
@@ -75,15 +141,16 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
+    // parse input
+    const collection = ['COLLECTION', ['KEY', this.name]];
+    const selection = this.validateSelection(this.parseSelection($query));
+    const projection = this.validateProjection(this.parseProjection(options.projection));
+    const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+    const limit = this.parseLimit(1);
+    const offset = this.parseOffset(0);
+
     // compile parameterized SQL query
-    const query = compileFindQuery({
-      table: this.name,
-      selection: this.parseSelection(selection),
-      projection: this.parseProjection(options.projection),
-      orderby: this.parseOrderBy(options.orderby),
-      limit: this.parseLimit(1),
-      offset: this.parseOffset(0),
-    });
+    const query = compileFindQuery({collection, selection, projection, orderby, limit, offset});
 
     // run statement
     return this.db.query(query.sql, query.params)
@@ -93,7 +160,7 @@ class MySqlCollection extends Collection {
 
   /**
    * Counts designated records in the collection.
-   * @param {(boolean|number|string|Date|Object|Array<Object>)} selection a naomi selection expression.
+   * @param {(boolean|number|string|Date|Object|Array<Object>)} [$query] a naomi query object.
    * @param {Object} [options] query options.
    * @param {(string, Object, Array<string, Object)} [options.orderby] a naomi orderby expression.
    * @param {number} [options.limit] maximum number of records to retrieve.
@@ -102,11 +169,11 @@ class MySqlCollection extends Collection {
    * @returns {Promise<number>} a bluebird promise resolving to the number of records.
    * @throws {TypeError} if arguments are of invalid type.
    */
-  count(selection: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
+  count($query: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
     // handle optional arguments
-    if (_.isFunction(selection)) {
-      callback = selection;
-      selection = undefined;
+    if (_.isFunction($query)) {
+      callback = $query;
+      $query = undefined;
       options = {};
     }
 
@@ -115,14 +182,15 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
+    // parse input
+    const collection = ['COLLECTION', ['KEY', this.name]];
+    const selection = this.validateSelection(this.parseSelection($query));
+    const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+    const limit = this.parseLimit(options.limit);
+    const offset = this.parseOffset(options.offset);
+
     // compile parameterized SQL query
-    const query = compileCountQuery({
-      table: this.name,
-      selection: this.parseSelection(selection),
-      orderby: this.parseOrderBy(options.orderby),
-      limit: this.parseLimit(1),
-      offset: this.parseOffset(0),
-    });
+    const query = compileCountQuery({collection, selection, orderby, limit, offset});
 
     // run statement
     return this.db.query(query.sql, query.params)
@@ -132,7 +200,7 @@ class MySqlCollection extends Collection {
 
   /**
    * Removes designated records from the collection.
-   * @param {(boolean|number|string|Date|Object|Array<Object>)} [selection] an optional naomi selection expression.
+   * @param {(boolean|number|string|Date|Object|Array<Object>)} [$query] a naomi query object.
    * @param {Object} [options] query options.
    * @param {(string, Object, Array<string, Object)} [options.orderby] a naomi orderby expression.
    * @param {number} [options.limit] maximum number of records to retrieve.
@@ -140,11 +208,11 @@ class MySqlCollection extends Collection {
    * @returns {Promise>} a bluebird promise.
    * @throws {TypeError} if arguments are of invalid type.
    */
-  remove(selection: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
+  remove($query: boolean | number | string | Object | ?Function, options: Object | ?Function, callback: ?Function): Promise {
     // handle optional arguments
-    if (_.isFunction(selection)) {
-      callback = selection;
-      selection = undefined;
+    if (_.isFunction($query)) {
+      callback = $query;
+      $query = undefined;
       options = {};
     }
 
@@ -153,13 +221,14 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
+    // parse input
+    const collection = ['COLLECTION', ['KEY', this.name]];
+    const selection = this.validateSelection(this.parseSelection($query));
+    const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+    const limit = this.parseLimit(options.limit);
+
     // compile parameterized SQL query
-    const query = compileRemoveQuery({
-      table: this.name,
-      selection: this.parseSelection(selection),
-      orderby: this.parseOrderBy(options.orderby),
-      limit: this.parseLimit(1),
-    });
+    const query = compileRemoveQuery({collection, selection, orderby, limit});
 
     // run statement
     return this.db.query(query.sql, query.params)
@@ -176,8 +245,11 @@ class MySqlCollection extends Collection {
    * @throws {TypeError} if arguments are of invalid type.
    */
   insert(records: Object | Array<Object>, options: Object | ?Function, callback: ?Function): Promise {
+    let isRecordsObject = false;
+
     // validate arguments
     if (_.isPlainObject(records)) {
+      isRecordsObject = true;
       records = [records]; // make sure records is array
     } else if (!_.isArray(records)) {
       throw new TypeError(`Invalid records argument; exprected object or array, received ${type(records)}`);
@@ -189,26 +261,44 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // set default options
-    options = _.defaults(options, {
-      ignore: false
-    });
-
     // validate records
     return Promise.map(records, (record) => this.schema.validate(record))
 
-      // compile parameterized SQL query
+      // parse input + compile query
       .then((values) => {
-        return compileInsertQuery({
-          values,
-          table: this.name,
-          columns: this.schema.keys(),
-          ignore: options.ignore === true,
-        });
+        const collection = ['COLLECTION', ['KEY', this.name]];
+        const keys = this.schema.keys();
+        const ignore = options.ignore === true;
+
+        return compileInsertQuery({collection, keys, values, ignore});
       })
 
       // execute query
       .then((query) => this.db.query(query.sql, query.params))
+
+      // return record indices in db
+      .then((result) => {
+        const autoinc = this.schema.hasAutoIncPrimaryKey();
+
+        return records.map((record, i) => {
+          // check if table has simple auto-inc primary key
+          if (autoinc) {
+            return {[this.schema.primaryKey()[0]]: result.insertId + i};
+          }
+
+          // extract primary key from record
+          return _.pick(record, this.schema.primaryKey());
+        });
+      })
+
+      // return object, if object was received
+      .then((arr) => {
+        if (isRecordsObject) {
+          return arr[0];
+        }
+
+        return arr;
+      })
 
       .nodeify(callback);
   }
@@ -238,34 +328,70 @@ class MySqlCollection extends Collection {
     // validate records
     return Promise.map(records, (record) => this.schema.validate(record))
 
-      // compile parameterized SQL query
+      // parse input + compile query
       .then((values) => {
-        return compileUpsertQuery({
-          values,
-          table: this.name,
-          columns: this.schema.keys(),
-          updateColumns: _.difference(this.schema.keys(), this.schema.primaryKeys())
-        });
+        const collection = ['COLLECTION', ['KEY', this.name]];
+        const keys = this.schema.keys();
+        const updateKeys = _.difference(keys, this.schema.primaryKeys());
+
+        return compileUpsertQuery({collection, keys, updateKeys, values});
       })
 
       // execute query
       .then((query) => this.db.query(query.sql, query.params))
+
+      // return record indices in db
+      .then((result) => {
+        const autoinc = this.schema.hasAutoIncPrimaryKey();
+        let insertedRows = 0;
+
+        return records.map((record, i) => {
+          // check if record contains primary key
+          const containsPrimaryKey = this.schema.primaryKey().every((k) => {
+            return record.hasOwnProperty(k);
+          });
+
+          if (containsPrimaryKey) {
+            return _.pick(record, this.schema.primaryKey());
+          }
+
+          // check if table has simple auto-inc primary key
+          if (autoinc) {
+            const obj = {[this.schema.primaryKey()[0]]: result.insertId + insertedRows};
+            insertedRows++;
+
+            return obj;
+          }
+
+          // return empty object by default
+          return {};
+        });
+      })
+
+      // return object, if object was received
+      .then((arr) => {
+        if (isRecordsObject) {
+          return arr[0];
+        }
+
+        return arr;
+      })
 
       .nodeify(callback);
   }
 
   /**
    * Updates the designated record(s) in the collection.
-   * @param {(boolean|number|string|Date|Object|Array<Object>)} selection a naomi selection expression.
+   * @param {(boolean|number|string|Date|Object|Array<Object>)} $query a naomi query object.
    * @param {Object} values key-value pairs to set in the updated records.
    * @param {Object} [options] query options.
    * @param {(string, Object, Array<string, Object)} [options.orderby] a naomi orderby expression.
    * @param {number} [options.limit] maximum number of records to retrieve.
    * @param {Function<err, Object>} [callback] an optional callback function with (err, keys) argument.
-   * @returns {Promise} a bluebird promise resolving to the primary key of the created/updated record(s).
+   * @returns {Promise} a bluebird promise resolving to the primary key of the updated record(s).
    * @throws {TypeError} if arguments are of invalid type.
    */
-  update(selection: boolean | number | string | ?Object, values: Object, options: ?Object, callback: ?Function): Promise {
+  update($query: boolean | number | string | ?Object, values: Object, options: ?Object, callback: ?Function): Promise {
     // validate arguments
     if (!_.isPlainObject(values)) {
       throw new TypeError(`Invalid values argument; exprected plain object, received ${type(values)}`);
@@ -277,22 +403,38 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // validate records
-    return Promise.map(values, (record) => this.schema.validate(record))
+    // validate values
+    return this.schema.validate(values)
 
-      // compile parameterized SQL query
-      .then((values) => {
-        return compileUpdateQuery({
-          values,
-          table: this.name,
-          selection: this.parseSelection(selection),
-          orderby: this.parseOrderBy(options.orderby),
-          limit: this.parseLimit(1),
-        });
+      // parse input + compile query
+      .then((attrs) => {
+        const collection = ['COLLECTION', ['KEY', this.name]];
+        const selection = this.validateSelection(this.parseSelection($query));
+        const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+        const limit = this.parseLimit(options.limit);
+
+        return compileUpdateQuery({attrs, collection, selection, orderby, limit});
       })
 
       // execute query
       .then((query) => this.db.query(query.sql, query.params))
+
+      // compile find query
+      .then(() => {
+        const collection = ['COLLECTION', ['KEY', this.name]];
+        const selection = this.validateSelection(this.parseSelection($query));
+        const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
+        const limit = this.parseLimit(options.limit);
+        const offset = this.parseOffset(null);
+
+        const query = compileFindQuery({collection, selection, projection, orderby, limit, offset});
+      })
+
+      // execute find query
+      .then((query) => this.db.query(query.sql, query.params))
+
+      // return record indices in db
+      .map((record) => _.pick(record, this.schema.primaryKey()))
 
       .nodeify(callback);
   }
