@@ -11,7 +11,7 @@ describe('Count query compiler', function () {
         ['KEY', 'employees']
       ],
       selection: [
-        'SELECT',
+        'SELECTION',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ],
       orderby: [

@@ -245,7 +245,7 @@ function compileAnd(ast: Array): Object {
   let params = [];
 
   _.tail(ast).forEach((e) => {
-    const expr = compile(['SELECT', e]); // eslint-disable-line no-use-before-define
+    const expr = compile(['SELECTION', e]); // eslint-disable-line no-use-before-define
     sql.push('(' + expr.sql + ')');
     params = params.concat(expr.params);
   });
@@ -268,7 +268,7 @@ function compileOr(ast: Array): Object {
   let params = [];
 
   _.tail(ast).forEach((e) => {
-    const expr = compile(['SELECT', e]); // eslint-disable-line no-use-before-define
+    const expr = compile(['SELECTION', e]); // eslint-disable-line no-use-before-define
     sql.push('(' + expr.sql + ')');
     params = params.concat(expr.params);
   });
@@ -282,8 +282,8 @@ function compileOr(ast: Array): Object {
  * @return {Object}
  */
 function compile(ast: Array): Object {
-  if (ast[0] !== 'SELECT') {
-    throw new TypeError(`Invalid AST function; expected "SELECT", received "${ast[0]}"`);
+  if (ast[0] !== 'SELECTION') {
+    throw new TypeError(`Invalid AST function; expected "SELECTION", received "${ast[0]}"`);
   }
 
   if (_.isNil(ast[1])) {

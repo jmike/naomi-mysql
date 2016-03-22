@@ -5,7 +5,7 @@ import compileProjection from '../../src/querycompilers/projection';
 
 describe('Projection compiler', function () {
   it('accepts AST with null arguments', function () {
-    const query = compileProjection(['PROJECT', null]);
+    const query = compileProjection(['PROJECTION', null]);
 
     assert.strictEqual(query.sql, '*');
     assert.deepEqual(query.params, []);
@@ -13,7 +13,7 @@ describe('Projection compiler', function () {
 
   it('accepts AST with key arguments', function () {
     const query = compileProjection([
-      'PROJECT',
+      'PROJECTION',
       ['KEY', 'firstname'],
       ['KEY', 'lastname']
     ]);

@@ -14,7 +14,7 @@ describe('Update query compiler', function () {
         age: 35
       },
       selection: [
-        'SELECT',
+        'SELECTION',
         ['EQ', ['KEY', 'lastname'], ['VALUE', 'Sparrow']]
       ],
       orderby: [

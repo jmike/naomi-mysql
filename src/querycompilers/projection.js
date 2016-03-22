@@ -8,8 +8,8 @@ import compileKey from './key';
  */
 function compile(ast: Array): Object {
   // make sure AST function is valid
-  if (ast[0] !== 'PROJECT') {
-    throw new TypeError(`Invalid AST function; expected "PROJECT", received "${ast[0]}"`);
+  if (ast[0] !== 'PROJECTION') {
+    throw new TypeError(`Invalid AST function; expected "PROJECTION", received "${ast[0]}"`);
   }
 
   // handle null argument

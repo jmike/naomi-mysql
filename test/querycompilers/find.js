@@ -10,8 +10,8 @@ describe('Find query compiler', function () {
         'COLLECTION',
         ['KEY', 'employees']
       ],
-      projection: ['PROJECT', null],
-      selection: ['SELECT', null],
+      projection: ['PROJECTION', null],
+      selection: ['SELECTION', null],
       orderby: ['ORDERBY', null],
       limit: ['LIMIT', null],
       offset: ['OFFSET', null]
@@ -28,12 +28,12 @@ describe('Find query compiler', function () {
         ['KEY', 'employees']
       ],
       projection: [
-        'PROJECT',
+        'PROJECTION',
         ['KEY', 'firstname'],
         ['KEY', 'lastname']
       ],
       selection: [
-        'SELECT',
+        'SELECTION',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]
       ],
       orderby: [
