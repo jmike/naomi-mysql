@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import CustomError from 'customerror';
 import compileKey from './key';
 
 /**
@@ -239,7 +238,7 @@ function compileNotLike(ast: Array): Object {
  */
 function compileAnd(ast: Array): Object {
   if (ast[0] !== 'AND') {
-    throw new TypeError(`Invalid AST; expected "AND" function, received "${ast[0]}"`);
+    throw new TypeError(`Invalid AST function; expected "AND", received "${ast[0]}"`);
   }
 
   const sql = [];
@@ -262,7 +261,7 @@ function compileAnd(ast: Array): Object {
  */
 function compileOr(ast: Array): Object {
   if (ast[0] !== 'OR') {
-    throw new TypeError(`Invalid AST; expected "OR" function, received "${ast[0]}"`);
+    throw new TypeError(`Invalid AST function; expected "OR", received "${ast[0]}"`);
   }
 
   const sql = [];
@@ -284,7 +283,7 @@ function compileOr(ast: Array): Object {
  */
 function compile(ast: Array): Object {
   if (ast[0] !== 'SELECT') {
-    throw new TypeError(`Invalid AST; expected "SELECT" function, received "${ast[0]}"`);
+    throw new TypeError(`Invalid AST function; expected "SELECT", received "${ast[0]}"`);
   }
 
   if (_.isNil(ast[1])) {
@@ -317,7 +316,7 @@ function compile(ast: Array): Object {
   case 'OR':
     return compileOr(ast[1]);
   default:
-    throw new CustomError(`Invalid AST; unknown identifier: ${ast[0]}`, 'QueryCompileException');
+    throw new TypeError(`Invalid AST; unknown identifier "${ast[0]}"`);
   }
 }
 

@@ -9,7 +9,7 @@ import compileKey from './key';
 function compile(ast: Array): Object {
   // make sure AST function is valid
   if (ast[0] !== 'PROJECT') {
-    throw new TypeError(`Invalid AST; expected "PROJECT" function, received "${ast[0]}"`);
+    throw new TypeError(`Invalid AST function; expected "PROJECT", received "${ast[0]}"`);
   }
 
   // handle null argument

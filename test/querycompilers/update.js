@@ -6,12 +6,15 @@ import compileUpdateQuery from '../../src/querycompilers/update';
 describe('Update query compiler', function () {
   it('accepts props with table, records, selection, orderby and limit', function () {
     const query = compileUpdateQuery({
-      table: 'employees',
-      values: {
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
+      attrs: {
         age: 35
       },
       selection: [
-        'SELECTION',
+        'SELECT',
         ['EQ', ['KEY', 'lastname'], ['VALUE', 'Sparrow']]
       ],
       orderby: [

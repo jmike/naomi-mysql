@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import CustomError from 'customerror';
 import compileKey from './key';
 
 /**
@@ -10,10 +9,10 @@ import compileKey from './key';
 function compile(ast: Array): Object {
   // make sure AST function is valid
   if (ast[0] !== 'ORDERBY') {
-    throw new TypeError(`Invalid AST; expected "ORDERBY", received "${ast[0]}"`);
+    throw new TypeError(`Invalid AST function; expected "ORDERBY", received "${ast[0]}"`);
   }
 
-  // handle null argument
+  // handle nil argument
   if (_.isNil(ast[1])) {
     return {sql: '', params: []};
   }

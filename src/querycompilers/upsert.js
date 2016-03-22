@@ -1,27 +1,32 @@
 import escapeIdentifier from './escape';
+import compileCollection from './collection';
 
 /**
  * Compiles and returns a parameterized SQL "insert ... on duplicate key update" query.
  * @param {Object} props query properties.
- * @param {string} props.table the name of the table.
- * @param {Array<string>} props.columns the columns of the table.
- * @param {Array<string>} props.updateColumns the columns to update on duplicate key.
+ * @param {Array} props.collection collection AST.
+ * @param {Array<string>} props.keys the keys of the table.
+ * @param {Array<string>} props.updateKeys the keys to update on duplicate key.
  * @param {Array<Object>} props.values an array of records to upsert to table.
  * @return {Object}
  * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
  */
-function compile(props: {table: string, columns: Array<string>, updateColumns: Array<string>, values: Array<Object>}): Object {
+function compile(props: {collection: Array, keys: Array<string>, updateKeys: Array<string>, values: Array<Object>}): Object {
   const sql = [];
-  const params = [];
+  let params = [];
 
-  sql.push('INSERT INTO', escapeIdentifier(props.table));
+  sql.push('INSERT');
 
-  const columns = props.columns.map((e) => escapeIdentifier(e)).join(', ');
+  const collection = compileCollection(props.collection);
+  sql.push('INTO', collection.sql);
+  params = params.concat(collection.params);
+
+  const columns = props.keys.map((e) => escapeIdentifier(e)).join(', ');
   sql.push(`(${columns})`);
 
   const values = props.values
     .map((obj) => {
-      const group = props.columns
+      const group = props.keys
         .map((k) => {
           params.push(obj[k]);
           return '?';
@@ -34,7 +39,7 @@ function compile(props: {table: string, columns: Array<string>, updateColumns: A
 
   sql.push('VALUES', values);
 
-  const updateColumns = props.updateColumns
+  const updateColumns = props.updateKeys
     .map((k) => {
       k = escapeIdentifier(k);
       return `${k} = VALUES(${k})`;

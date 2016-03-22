@@ -1,34 +1,33 @@
 import escapeIdentifier from './escape';
-import Schema from '../Schema';
+import compileCollection from './collection';
 
 /**
  * Compiles and returns a parameterized SQL "insert" query.
  * @param {Object} props query properties.
- * @param {string} props.table the name of the table.
- * @param {Array<string>} props.columns the columns of the table.
+ * @param {Array} props.collection collection AST.
+ * @param {Array<string>} props.keys collection keys.
  * @param {Array<Object>} props.values an array of records to insert to table.
- * @param {boolean} props.ignore returns "INSERT IGNORE" if set to true.
+ * @param {boolean} props.ignore enables "IGNORE" mode if set to true.
  * @return {Object}
- * @throws {NotImplementedException} if method has not been implemented or does not apply to the current database engine.
  */
-function compile(props: {table: string, columns: Array<string>, values: Array<Object>, ignore: boolean}): Object {
+function compile(props: {collection: Array, keys: Array<string>, values: Array<Object>, ignore: ?boolean}): Object {
   const sql = [];
-  const params = [];
+  let params = [];
 
   sql.push('INSERT');
 
-  if (props.ignore === true) {
-    sql.push('IGNORE');
-  }
+  if (props.ignore === true) sql.push('IGNORE');
 
-  sql.push('INTO', escapeIdentifier(props.table));
+  const collection = compileCollection(props.collection);
+  sql.push('INTO', collection.sql);
+  params = params.concat(collection.params);
 
-  const columns = props.columns.map((e) => escapeIdentifier(e)).join(', ');
+  const columns = props.keys.map((e) => escapeIdentifier(e)).join(', ');
   sql.push(`(${columns})`);
 
   const values = props.values
     .map((obj) => {
-      const group = props.columns
+      const group = props.keys
         .map((k) => {
           params.push(obj[k]);
           return '?';

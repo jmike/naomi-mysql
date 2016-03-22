@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import escapeIdentifier from './escape';
+import compileCollection from './collection';
 import compileSelection from './selection';
 import compileOrderBy from './orderBy';
 import compileLimit from './limit';
@@ -8,19 +8,22 @@ import compileOffset from './offset';
 /**
  * Compiles and returns a parameterized SQL "count" query.
  * @param {Object} props query properties.
- * @param {string} props.table the name of the table.
- * @param {Array} props.selection selection AST as provided by the QueryParser.
- * @param {Array} props.orderby orderby AST as provided by the QueryParser.
- * @param {Array} props.limit limit AST as provided by the QueryParser.
- * @param {Array} props.offset offset AST as provided by the QueryParser.
+ * @param {Array} props.collection collection AST.
+ * @param {Array} props.selection selection AST.
+ * @param {Array} props.orderby orderby AST.
+ * @param {Array} props.limit limit AST.
+ * @param {Array} props.offset offset AST.
  * @return {Object}
  */
-function compile(props: {table: string, selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+function compile(props: {collection: Array, selection: Array, orderby: Array, limit: Array, offset: Array}): Object {
   const sql = [];
   let params = [];
 
   sql.push('SELECT COUNT(*) AS `count`');
-  sql.push('FROM', escapeIdentifier(props.table));
+
+  const collection = compileCollection(props.collection);
+  sql.push('FROM', collection.sql);
+  params = params.concat(collection.params);
 
   const selection = compileSelection(props.selection);
 

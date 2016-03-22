@@ -6,7 +6,10 @@ import compileCountQuery from '../../src/querycompilers/count';
 describe('Count query compiler', function () {
   it('accepts props with table, selection, orderby, limit and offset', function () {
     const query = compileCountQuery({
-      table: 'employees',
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
       selection: [
         'SELECT',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]

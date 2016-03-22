@@ -6,7 +6,10 @@ import compileFindQuery from '../../src/querycompilers/find';
 describe('Find query compiler', function () {
   it('accepts props with table + empty projection, selection, orderby, limit and offset', function () {
     const query = compileFindQuery({
-      table: 'employees',
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
       projection: ['PROJECT', null],
       selection: ['SELECT', null],
       orderby: ['ORDERBY', null],
@@ -20,7 +23,10 @@ describe('Find query compiler', function () {
 
   it('accepts props with table, projection, selection, orderby, limit and offset', function () {
     const query = compileFindQuery({
-      table: 'employees',
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
       projection: [
         'PROJECT',
         ['KEY', 'firstname'],

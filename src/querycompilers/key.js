@@ -1,4 +1,5 @@
-import CustomError from 'customerror';
+import _ from 'lodash';
+import type from 'type-of';
 import escapeIdentifier from './escape';
 
 /**
@@ -9,7 +10,12 @@ import escapeIdentifier from './escape';
 function compile(ast: Array): Object {
   // make sure AST function is valid
   if (ast[0] !== 'KEY') {
-    throw new CustomError(`Invalid AST; expected "KEY", received "${ast[0]}"`, 'QueryCompileException');
+    throw new TypeError(`Invalid AST function; expected "KEY", received "${ast[0]}"`);
+  }
+
+  // handle null or undefined argument
+  if (!_.isString(ast[1])) {
+    throw new TypeError(`Invalid AST argument; expected string, received ${type(ast[1])}`);
   }
 
   const sql = escapeIdentifier(ast[1]);

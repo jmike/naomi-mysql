@@ -6,7 +6,10 @@ import compileRemoveQuery from '../../src/querycompilers/remove';
 describe('Remove query compiler', function () {
   it('accepts props with table, selection, orderby and limit', function () {
     const query = compileRemoveQuery({
-      table: 'employees',
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
       selection: [
         'SELECT',
         ['EQ', ['KEY', 'age'], ['VALUE', 23]]

@@ -4,10 +4,13 @@ import {assert} from 'chai';
 import compileInsertQuery from '../../src/querycompilers/insert';
 
 describe('Insert query compiler', function () {
-  it('accepts props with table, columns and records', function () {
+  it('accepts props with table, keys and values', function () {
     const query = compileInsertQuery({
-      table: 'employees',
-      columns: ['id', 'firstname', 'lastname', 'age'],
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
+      keys: ['id', 'firstname', 'lastname', 'age'],
       values: [
         {firstname: 'Jack', lastname: 'Sparrow', age: 34},
         {firstname: 'Will', lastname: 'Turner', age: 27}
@@ -18,10 +21,13 @@ describe('Insert query compiler', function () {
     assert.deepEqual(query.params, [undefined, 'Jack', 'Sparrow', 34, undefined, 'Will', 'Turner', 27]);
   });
 
-  it('accepts props with table, columns, records records and ignore set as true', function () {
+  it('accepts props with table, keys, values + ignore = true', function () {
     const query = compileInsertQuery({
-      table: 'employees',
-      columns: ['id', 'firstname', 'lastname', 'age'],
+      collection: [
+        'COLLECTION',
+        ['KEY', 'employees']
+      ],
+      keys: ['id', 'firstname', 'lastname', 'age'],
       values: [
         {firstname: 'Jack', lastname: 'Sparrow', age: 34}
       ],
