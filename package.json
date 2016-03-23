@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "babel-core": "^6.7.4",
+    "babel-plugin-transform-flow-strip-types": "^6.7.0",
     "bluebird": "^3.3.4",
     "customerror": "^1.0.1",
     "lodash": "^4.6.1",
