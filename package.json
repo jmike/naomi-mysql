@@ -32,6 +32,15 @@
     "url": "https://github.com/jmike/naomi-mysql/issues"
   },
   "homepage": "https://github.com/jmike/naomi-mysql#readme",
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "customerror": "^1.0.1",
+    "lodash": "^4.6.1",
+    "mysql": "^2.10.2",
+    "naomi": "^2.0.0-beta.2",
+    "require-directory": "^2.1.1",
+    "type-of": "^2.0.1"
+  },
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-core": "^6.7.4",
@@ -49,14 +58,5 @@
     "gulp-rimraf": "^0.2.0",
     "mocha": "^2.4.5",
     "run-sequence": "^1.1.4"
-  },
-  "dependencies": {
-    "bluebird": "^3.3.4",
-    "customerror": "^1.0.1",
-    "lodash": "^4.6.1",
-    "mysql": "^2.10.2",
-    "naomi": "^2.0.0-beta.1",
-    "require-directory": "^2.1.1",
-    "type-of": "^2.0.1"
   }
 }
