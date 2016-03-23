@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import CustomError from 'customerror';
-import Schema from 'naomi/src/Schema';
+import Schema from 'naomi/lib/Schema';
 import mysql2naomi from './mysql2naomi';
 
 class MySqlSchema extends Schema {

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Promise from 'bluebird'; // eslint-disable-line
 import type from 'type-of';
 import CustomError from 'customerror';
-import Collection from 'naomi/src/Collection';
+import Collection from 'naomi/lib/Collection';
 import Schema from './Schema';
 import compileFindQuery from './querycompilers/find';
 import compileCountQuery from './querycompilers/count';
@@ -10,7 +10,6 @@ import compileInsertQuery from './querycompilers/insert';
 import compileUpsertQuery from './querycompilers/upsert';
 import compileUpdateQuery from './querycompilers/update';
 import compileRemoveQuery from './querycompilers/remove';
-import extractKeys from './utils/extractKeysFromAST';
 
 class MySqlCollection extends Collection {
 
@@ -21,16 +20,7 @@ class MySqlCollection extends Collection {
    * @throws {SelectionParseError} if selection is invalid
    */
   validateSelection(ast: Array): Array {
-    const keys = extractKeys(ast);
-
-    // make sure selection keys exist in schema
-    keys.forEach((k) => {
-      if (!this.schema.has(k)) {
-        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'SelectionParseError');
-      }
-    });
-
-    return ast;
+    return this.validateKeysInAST(ast);
   }
 
   /**
@@ -42,23 +32,17 @@ class MySqlCollection extends Collection {
   validateProjection(ast: Array): Array {
     // handle nil arguments
     if (_.isNil(ast[1])) {
-      const projection = _.chain(this.schema.keys()).map((k) => [k, 1]).fromPairs().value();
+      const projection = _.chain(this.schema.getKeys()).map((k) => [k, 1]).fromPairs().value();
       return this.parseProjection(projection);
     }
 
-    // extract projection keys
-    const keys = extractKeys(ast);
-
     // make sure projection keys exist in schema
-    keys.forEach((k) => {
-      if (!this.schema.has(k)) {
-        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'ProjectionParseError');
-      }
-    });
+    ast = this.validateKeysInAST(ast);
 
     // invert negative projection
     if (ast[0] === 'NPROJECTION') {
-      const projection = _.chain(keys).xor(this.schema.keys()).map((k) => [k, 1]).fromPairs().value();
+      const keys = this.extractKeysFromAST(ast);
+      const projection = _.chain(keys).xor(this.schema.getKeys()).map((k) => [k, 1]).fromPairs().value();
       return this.parseProjection(projection);
     }
 
@@ -72,16 +56,7 @@ class MySqlCollection extends Collection {
    * @throws {OrderByParseError} if selection is invalid
    */
   validateOrderBy(ast: Array): Array {
-    const keys = extractKeys(ast);
-
-    // make sure selection keys exist in schema
-    keys.forEach((k) => {
-      if (!this.schema.has(k)) {
-        throw new CustomError(`Unknown key "${k}" not found in ${this.name} table`, 'OrderByParseError');
-      }
-    });
-
-    return ast;
+    return this.validateKeysInAST(ast);
   }
 
   /**
@@ -284,7 +259,7 @@ class MySqlCollection extends Collection {
       // parse input + compile query
       .then((values) => {
         const collection = ['COLLECTION', ['KEY', this.name]];
-        const keys = this.schema.keys();
+        const keys = this.schema.getKeys();
         const ignore = options.ignore === true;
 
         return compileInsertQuery({collection, keys, values, ignore});
@@ -300,11 +275,11 @@ class MySqlCollection extends Collection {
         return records.map((record, i) => {
           // check if table has simple auto-inc primary key
           if (autoinc) {
-            return {[this.schema.primaryKey()[0]]: result.insertId + i};
+            return {[this.schema.getPrimaryKey()[0]]: result.insertId + i};
           }
 
           // extract primary key from record
-          return _.pick(record, this.schema.primaryKey());
+          return _.pick(record, this.schema.getPrimaryKey());
         });
       })
 
@@ -353,8 +328,8 @@ class MySqlCollection extends Collection {
       // parse input + compile query
       .then((values) => {
         const collection = ['COLLECTION', ['KEY', this.name]];
-        const keys = this.schema.keys();
-        const updateKeys = _.difference(keys, this.schema.primaryKeys());
+        const keys = this.schema.getKeys();
+        const updateKeys = _.difference(keys, this.schema.getPrimaryKeys());
 
         return compileUpsertQuery({collection, keys, updateKeys, values});
       })
@@ -369,17 +344,17 @@ class MySqlCollection extends Collection {
 
         return records.map((record) => {
           // check if record contains primary key
-          const containsPrimaryKey = this.schema.primaryKey().every((k) => {
+          const containsPrimaryKey = this.schema.getPrimaryKey().every((k) => {
             return record.hasOwnProperty(k);
           });
 
           if (containsPrimaryKey) {
-            return _.pick(record, this.schema.primaryKey());
+            return _.pick(record, this.schema.getPrimaryKey());
           }
 
           // check if table has simple auto-inc primary key
           if (autoinc) {
-            const obj = {[this.schema.primaryKey()[0]]: result.insertId + insertedRows};
+            const obj = {[this.schema.getPrimaryKey()[0]]: result.insertId + insertedRows};
             insertedRows++;
 
             return obj;

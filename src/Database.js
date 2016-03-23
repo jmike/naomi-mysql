@@ -2,8 +2,9 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import mysql from 'mysql';
 import type from 'type-of';
-import Database from 'naomi/src/Database';
-import MySqlCollection from './Collection';
+import Database from 'naomi/lib/Database';
+import Schema from './Schema';
+import Collection from './Collection';
 
 class MySqlDatabase extends Database {
 
@@ -33,7 +34,6 @@ class MySqlDatabase extends Database {
 
     this.name = connectionProperties.database;
     this._pool = null;
-    this.Collection = MySqlCollection.bind(null, this);
   }
 
   /**
@@ -198,6 +198,16 @@ class MySqlDatabase extends Database {
         });
       });
     });
+  }
+
+  /**
+   * Creates and returns a new Collection with the specified properties.
+   * @param {string} name the name of the collection.
+   * @param {(Object, Schema)} [schema] optional collection schema.
+   * @type {Collection}
+   */
+  collection(name: string, schema: Schema | ?Object): Collection {
+    return new Collection(this, name, schema);
   }
 
 }
