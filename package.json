@@ -2,7 +2,7 @@
   "name": "naomi-mysql",
   "version": "2.0.0-alpha.1",
   "description": "MySQL connector for the Naomi ORM.",
-  "main": "dist/Database.js",
+  "main": "lib/naomi.js",
   "scripts": {
     "build": "gulp rebuild",
     "prepublish": "npm run build",
