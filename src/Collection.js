@@ -58,6 +58,25 @@ class MySqlCollection extends Collection {
     return this.validateKeysInAST(ast);
   }
 
+  // replaceIdInAST(ast: Array): Array {
+  //   this.schema.hasAtomicPrimaryKey();
+
+  //   return ast.map((e) => {
+  //     if (_.isArray(e)) {
+  //       return this.replaceIdInAST(e);
+  //     }
+
+  //     if (e === 'ID') {
+  //       return
+  //     }
+
+  //   })
+
+  //   if (ast[0] === 'ID') {
+  //     return
+  //   }
+  // }
+
   /**
    * Retrieves designated records from the collection.
    * @param {(boolean|number|string|Date|Object|Array<Object>)} [$query] a naomi query object.
@@ -395,7 +414,7 @@ class MySqlCollection extends Collection {
     // validate values
     return Promise.resolve()
 
-      .then(() => this.schema.validate(values))
+      .then(() => this.schema.validate(values, _.keys(values)))
 
       // parse input + compile query
       .then((attrs) => {
