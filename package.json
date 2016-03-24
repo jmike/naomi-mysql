@@ -1,6 +1,6 @@
 {
   "name": "naomi-mysql",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "MySQL connector for the Naomi ORM.",
   "main": "lib/naomi.js",
   "scripts": {
