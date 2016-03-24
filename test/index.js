@@ -23,6 +23,7 @@ mocha.addFile(path.resolve(__dirname, './querycompilers/upsert'));
 mocha.addFile(path.resolve(__dirname, './querycompilers/update'));
 mocha.addFile(path.resolve(__dirname, './database'));
 mocha.addFile(path.resolve(__dirname, './collection'));
+mocha.addFile(path.resolve(__dirname, './naomi'));
 
 // run the tests
 mocha.run(function (failures) {
