@@ -37,7 +37,7 @@
     "customerror": "^1.0.1",
     "lodash": "^4.6.1",
     "mysql": "^2.10.2",
-    "naomi": "^2.0.0-beta.3",
+    "naomi": "^2.0.0-beta.4",
     "require-directory": "^2.1.1",
     "type-of": "^2.0.1"
   },
