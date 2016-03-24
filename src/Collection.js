@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird'; // eslint-disable-line
 import type from 'type-of';
-import CustomError from 'customerror';
 import Collection from 'naomi/lib/Collection';
 import Schema from './Schema';
 import compileFindQuery from './querycompilers/find';
@@ -256,40 +255,37 @@ class MySqlCollection extends Collection {
     // validate records
     return Promise.map(records, (record) => this.schema.validate(record))
 
-      // parse input + compile query
+      // compile + run query
       .then((values) => {
         const collection = ['COLLECTION', ['KEY', this.name]];
         const keys = this.schema.getKeys();
         const ignore = options.ignore === true;
 
-        return compileInsertQuery({collection, keys, values, ignore});
-      })
+        const query = compileInsertQuery({collection, keys, values, ignore});
 
-      // execute query
-      .then((query) => this.db.query(query.sql, query.params))
+        // execute query
+        return this.db.query(query.sql, query.params)
 
-      // return record indices in db
-      .then((result) => {
-        const autoinc = this.schema.hasAutoIncPrimaryKey();
+          // return record indices in db
+          .then((result) => {
+            const autoinc = this.schema.hasAutoIncPrimaryKey();
 
-        return records.map((record, i) => {
-          // check if table has simple auto-inc primary key
-          if (autoinc) {
-            return {[this.schema.getPrimaryKey()[0]]: result.insertId + i};
-          }
+            return values.map((obj, i) => {
+              // check if table has simple auto-inc primary key
+              if (autoinc) {
+                return {[this.schema.getPrimaryKey()[0]]: result.insertId + i};
+              }
 
-          // extract primary key from record
-          return _.pick(record, this.schema.getPrimaryKey());
-        });
-      })
+              // extract primary key from obj
+              return _.pick(obj, this.schema.getPrimaryKey());
+            });
+          })
 
-      // return object, if object was received
-      .then((arr) => {
-        if (isRecordsObject) {
-          return arr[0];
-        }
-
-        return arr;
+          // return object, if object was received
+          .then((arr) => {
+            if (isRecordsObject) return arr[0];
+            return arr;
+          });
       })
 
       .nodeify(callback);
@@ -325,53 +321,47 @@ class MySqlCollection extends Collection {
     // validate records
     return Promise.map(records, (record) => this.schema.validate(record))
 
-      // parse input + compile query
+      // compile + run query
       .then((values) => {
         const collection = ['COLLECTION', ['KEY', this.name]];
         const keys = this.schema.getKeys();
         const updateKeys = _.difference(keys, this.schema.getPrimaryKeys());
 
-        return compileUpsertQuery({collection, keys, updateKeys, values});
-      })
+        const query = compileUpsertQuery({collection, keys, updateKeys, values});
 
-      // execute query
-      .then((query) => this.db.query(query.sql, query.params))
+        // execute query
+        return this.db.query(query.sql, query.params)
 
-      // return record indices in db
-      .then((result) => {
-        const autoinc = this.schema.hasAutoIncPrimaryKey();
-        let insertedRows = 0;
+          // return record indices in db
+          .then((result) => {
+            const autoinc = this.schema.hasAutoIncPrimaryKey();
+            let insertedRows = 0;
 
-        return records.map((record) => {
-          // check if record contains primary key
-          const containsPrimaryKey = this.schema.getPrimaryKey().every((k) => {
-            return record.hasOwnProperty(k);
+            return values.map((obj) => {
+              // check if obj contains primary key
+              const containsPrimaryKey = this.schema.getPrimaryKey().every((k) => {
+                return obj.hasOwnProperty(k);
+              });
+
+              if (containsPrimaryKey) {
+                return _.pick(obj, this.schema.getPrimaryKey());
+              }
+
+              // check if table has simple auto-inc primary key
+              if (autoinc) {
+                return {[this.schema.getPrimaryKey()[0]]: result.insertId + (insertedRows++)};
+              }
+
+              // return empty object by default
+              return {};
+            });
+          })
+
+          // return object, if object was received
+          .then((arr) => {
+            if (isRecordsObject) return arr[0];
+            return arr;
           });
-
-          if (containsPrimaryKey) {
-            return _.pick(record, this.schema.getPrimaryKey());
-          }
-
-          // check if table has simple auto-inc primary key
-          if (autoinc) {
-            const obj = {[this.schema.getPrimaryKey()[0]]: result.insertId + insertedRows};
-            insertedRows++;
-
-            return obj;
-          }
-
-          // return empty object by default
-          return {};
-        });
-      })
-
-      // return object, if object was received
-      .then((arr) => {
-        if (isRecordsObject) {
-          return arr[0];
-        }
-
-        return arr;
       })
 
       .nodeify(callback);
