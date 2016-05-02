@@ -118,12 +118,16 @@ class MySqlDatabase extends Database {
       throw new TypeError(`Invalid "query" argument; expected object, received ${type(query)}`);
     }
 
+    // validate sql property of query
     if (!_.isString(query.sql)) {
       throw new TypeError('Invalid "sql" property in "query" argument; ' +
         `expected string, received ${type(query.sql)}`);
     }
 
-    if (!_.isArray(query.params)) {
+    // validate params property of query
+    if (_.isUndefined(query.params)) {
+      query.params = [];
+    } else if (!_.isArray(query.params)) {
       throw new TypeError('Invalid "params" property in "query" argument; ' +
         `expected array, received ${type(query.params)}`);
     }
