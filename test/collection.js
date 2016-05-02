@@ -1,11 +1,9 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
-import Promise from 'bluebird';
+import { assert } from 'chai';
 import Database from '../src/Database';
-import Collection from '../src/Collection';
 
-describe('Collection', function () {
+describe('Collection', () => {
   const db = new Database({
     host: process.env.MYSQL_HOST,
     port: parseInt(process.env.MYSQL_PORT, 10),
@@ -15,145 +13,155 @@ describe('Collection', function () {
   });
 
   const employees = db.collection('employees', {
-    id: {type: 'integer', autoinc: true, min: 0},
-    firstname: {type: 'string', maxLength: 45, nullable: true},
-    lastname: {type: 'string', maxLength: 45, nullable: true},
-    age: {type: 'integer', min: 18, max: 100},
+    id: { type: 'integer', autoinc: true, min: 0 },
+    firstname: { type: 'string', maxLength: 45, nullable: true },
+    lastname: { type: 'string', maxLength: 45, nullable: true },
+    age: { type: 'integer', min: 18, max: 100 },
   });
 
-  employees.index({id: 1}, {type: 'primary'});
+  employees.index({ id: 1 }, { type: 'primary' });
 
-  before(function (done) {
+  before((done) => {
     db.connect(done);
   });
 
-  after(function (done) {
+  after((done) => {
     db.disconnect(done);
   });
 
-  describe('performs CRUD (+ count) cycle', function () {
+  describe('CRUD (+ count) operation', () => {
     let count;
     let pk;
 
-    it('counts records', function (done) {
+    it('counts records', (done) => {
       employees.count()
 
-        .then(function (n) {
+        .then((n) => {
           assert.isNumber(n);
           assert.operator(n, '>=', 1);
           count = n;
         })
 
-        .then(done)
-        .catch(done);
+        .nodeify(done);
     });
 
-    it('creates record', function (done) {
-      employees.insert({firstname: 'Donnie', lastname: 'Azoff', age: 36})
-        .then(function (result) {
+    it('creates record', (done) => {
+      employees.insert({ firstname: 'Donnie', lastname: 'Azoff', age: 36 })
+
+        .then((result) => {
           assert.isObject(result);
           assert.isNumber(result.id);
           pk = result;
         })
+
         // count records to validate #add
-        .then(function () {
+        .then(() => {
           return employees.count();
         })
-        .then(function (n) {
+
+        .then((n) => {
           assert.strictEqual(n, count + 1);
           count = n;
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
 
-    it('reads record (using primary key)', function (done) {
+    it('reads record (using primary key)', (done) => {
       employees.find(pk)
-        .then(function (records) {
+
+        .then((records) => {
           assert.isArray(records);
           assert.lengthOf(records, 1);
           assert.strictEqual(records[0].id, pk.id);
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
 
-    it('updates record (using primary key)', function (done) {
-      employees.update(pk, {age: 37})
+    it('updates record (using primary key)', (done) => {
+      employees.update(pk, { age: 37 })
+
         // read employee to validate #update
-        .then(function () {
+        .then(() => {
           return employees.findOne(pk);
         })
-        .then(function (record) {
+
+        .then((record) => {
           assert.strictEqual(record.age, 37);
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
 
-    it('deletes record (using primary key)', function (done) {
+    it('deletes record (using primary key)', (done) => {
       employees.remove(pk)
+
         // count records to validate #del
-        .then(function () {
+        .then(() => {
           return employees.count();
         })
-        .then(function (n) {
+
+        .then((n) => {
           assert.strictEqual(n, count - 1);
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
   });
 
-  describe('performs CRUD (+ count) cycle for multiple records', function () {
+  describe('CRUD (+ count) operation on multiple records', () => {
     const values = [
-      {firstname: 'Mr.', lastname: 'Doobs', age: 18},
-      {firstname: 'George', lastname: 'Fudge', age: 19},
-      {firstname: 'Jack', lastname: 'White', age: 20}
+      { firstname: 'Mr.', lastname: 'Doobs', age: 18 },
+      { firstname: 'George', lastname: 'Fudge', age: 19 },
+      { firstname: 'Jack', lastname: 'White', age: 20 }
     ];
 
     let pk;
     let count;
 
-    it('counts records', function (done) {
+    it('counts records', (done) => {
       employees.count()
-        .then(function (n) {
+
+        .then((n) => {
           assert.isNumber(n);
           assert.operator(n, '>=', 1);
           count = n;
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
 
-    it('creates records', function (done) {
+    it('creates records', (done) => {
       employees.insert(values)
-        .then(function (result) {
+        .then((result) => {
           assert.isArray(result);
           assert.lengthOf(result, 3);
           assert.isObject(result[0]);
           assert.property(result[0], 'id');
           pk = result;
         })
+
         // count records to validate #add
-        .then(function () {
+        .then(() => {
           return employees.count();
         })
-        .then(function (n) {
+
+        .then((n) => {
           assert.strictEqual(n, count + 3);
           count = n;
         })
-        .then(done)
-        .catch(done);
+
+        .nodeify(done);
     });
 
-    it('updates records (using primary key)', function (done) {
-      employees.update(pk, {age: 30})
+    it('updates records (using primary key)', (done) => {
+      employees.update(pk, { age: 30 })
         // read employee to validate #update
-        .then(function () {
+        .then(() => {
           return employees.find(pk);
         })
-        .each(function (record) {
+        .each((record) => {
           assert.strictEqual(record.age, 30);
         })
         .return()
@@ -162,13 +170,13 @@ describe('Collection', function () {
     });
 
 
-    it('deletes records (using primary key)', function (done) {
+    it('deletes records (using primary key)', (done) => {
       employees.remove(pk)
         // count records to validate #del
-        .then(function () {
+        .then(() => {
           return employees.count();
         })
-        .then(function (n) {
+        .then((n) => {
           assert.strictEqual(n, count - 3);
         })
         .then(done)

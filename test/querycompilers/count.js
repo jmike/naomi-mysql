@@ -1,10 +1,10 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileCountQuery from '../../src/querycompilers/count';
 
-describe('Count query compiler', function () {
-  it('accepts props with table, selection, orderby, limit and offset', function () {
+describe('Count query compiler', () => {
+  it('accepts props with table, selection, orderby, limit and offset', () => {
     const query = compileCountQuery({
       collection: [
         'COLLECTION',
@@ -23,7 +23,8 @@ describe('Count query compiler', function () {
       offset: ['OFFSET', 20]
     });
 
-    assert.strictEqual(query.sql, 'SELECT COUNT(*) AS `count` FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
+    assert.strictEqual(query.sql, 'SELECT COUNT(*) AS `count` FROM `employees` ' +
+      'WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
     assert.deepEqual(query.params, [23]);
   });
 });

@@ -1,10 +1,10 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileKey from '../../src/querycompilers/key';
 
-describe('Key compiler', function () {
-  it('accepts valid AST', function () {
+describe('Key compiler', () => {
+  it('accepts valid AST', () => {
     const query = compileKey(['KEY', 'id']);
 
     assert.strictEqual(query.sql, '`id`');

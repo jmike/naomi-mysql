@@ -1,17 +1,17 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileSelection from '../../src/querycompilers/selection';
 
-describe('Selection compiler', function () {
-  it('accepts AST with nil arguments', function () {
+describe('Selection compiler', () => {
+  it('accepts AST with nil arguments', () => {
     const query = compileSelection(['SELECTION', null]);
 
     assert.strictEqual(query.sql, '');
     assert.deepEqual(query.params, []);
   });
 
-  it('accepts AST with nested EQ function', function () {
+  it('accepts AST with nested EQ function', () => {
     const query = compileSelection([
       'SELECTION',
       ['EQ', ['KEY', 'age'], ['VALUE', 23]]
@@ -21,7 +21,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested EQ function + null argument', function () {
+  it('accepts AST with nested EQ function + null argument', () => {
     const query = compileSelection([
       'SELECTION',
       ['EQ', ['KEY', 'age'], ['VALUE', null]]
@@ -31,7 +31,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, []);
   });
 
-  it('accepts AST with nested NE function', function () {
+  it('accepts AST with nested NE function', () => {
     const query = compileSelection([
       'SELECTION',
       ['NE', ['KEY', 'age'], ['VALUE', 23]]
@@ -41,7 +41,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested NE function + null value', function () {
+  it('accepts AST with nested NE function + null value', () => {
     const query = compileSelection([
       'SELECTION',
       ['NE', ['KEY', 'age'], ['VALUE', null]]
@@ -51,7 +51,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, []);
   });
 
-  it('accepts AST with nested GT function', function () {
+  it('accepts AST with nested GT function', () => {
     const query = compileSelection([
       'SELECTION',
       ['GT', ['KEY', 'age'], ['VALUE', 23]]
@@ -61,7 +61,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested GTE function', function () {
+  it('accepts AST with nested GTE function', () => {
     const query = compileSelection([
       'SELECTION',
       ['GTE', ['KEY', 'age'], ['VALUE', 23]]
@@ -71,7 +71,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested LT function', function () {
+  it('accepts AST with nested LT function', () => {
     const query = compileSelection([
       'SELECTION',
       ['LT', ['KEY', 'age'], ['VALUE', 23]]
@@ -81,7 +81,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested LTE function', function () {
+  it('accepts AST with nested LTE function', () => {
     const query = compileSelection([
       'SELECTION',
       ['LTE', ['KEY', 'age'], ['VALUE', 23]]
@@ -91,7 +91,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23]);
   });
 
-  it('accepts AST with nested IN function', function () {
+  it('accepts AST with nested IN function', () => {
     const query = compileSelection([
       'SELECTION',
       ['IN', ['KEY', 'age'], ['VALUES', 20, 30, 40]]
@@ -101,7 +101,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [20, 30, 40]);
   });
 
-  it('accepts AST with nested NIN function', function () {
+  it('accepts AST with nested NIN function', () => {
     const query = compileSelection([
       'SELECTION',
       ['NIN', ['KEY', 'age'], ['VALUES', 20, 30, 40]]
@@ -111,7 +111,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [20, 30, 40]);
   });
 
-  it('accepts AST with nested LIKE function', function () {
+  it('accepts AST with nested LIKE function', () => {
     const query = compileSelection([
       'SELECTION',
       ['LIKE', ['KEY', 'firstname'], ['VALUE', '%ohn']]
@@ -121,7 +121,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, ['%ohn']);
   });
 
-  it('accepts AST with nested NLIKE function', function () {
+  it('accepts AST with nested NLIKE function', () => {
     const query = compileSelection([
       'SELECTION',
       ['NLIKE', ['KEY', 'firstname'], ['VALUE', '%ohn']]
@@ -131,7 +131,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, ['%ohn']);
   });
 
-  it('accepts AST with nested AND function', function () {
+  it('accepts AST with nested AND function', () => {
     const query = compileSelection([
       'SELECTION',
       ['AND',
@@ -144,7 +144,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23, 'John']);
   });
 
-  it('accepts AST with nested OR function', function () {
+  it('accepts AST with nested OR function', () => {
     const query = compileSelection([
       'SELECTION',
       ['OR',
@@ -157,7 +157,7 @@ describe('Selection compiler', function () {
     assert.deepEqual(query.params, [23, 'John']);
   });
 
-  it('accepts AST with nested AND function + inner nested OR function', function () {
+  it('accepts AST with nested AND function + inner nested OR function', () => {
     const query = compileSelection([
       'SELECTION',
       ['AND',

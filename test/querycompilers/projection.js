@@ -1,17 +1,17 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileProjection from '../../src/querycompilers/projection';
 
-describe('Projection compiler', function () {
-  it('accepts AST with null arguments', function () {
+describe('Projection compiler', () => {
+  it('accepts AST with null arguments', () => {
     const query = compileProjection(['PROJECTION', null]);
 
     assert.strictEqual(query.sql, '*');
     assert.deepEqual(query.params, []);
   });
 
-  it('accepts AST with key arguments', function () {
+  it('accepts AST with key arguments', () => {
     const query = compileProjection([
       'PROJECTION',
       ['KEY', 'firstname'],
@@ -22,7 +22,7 @@ describe('Projection compiler', function () {
     assert.deepEqual(query.params, []);
   });
 
-  it('throws error with NPROJECT function', function () {
+  it('throws error with NPROJECT function', () => {
     assert.throws(() => compileProjection(['NPROJECT', null]), TypeError);
   });
 });

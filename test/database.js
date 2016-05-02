@@ -1,10 +1,9 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
-import Promise from 'bluebird';
+import { assert } from 'chai';
 import Database from '../src/Database';
 
-describe('Database', function () {
+describe('Database', () => {
   const db = new Database({
     host: process.env.MYSQL_HOST,
     port: parseInt(process.env.MYSQL_PORT, 10),
@@ -13,92 +12,92 @@ describe('Database', function () {
     database: process.env.MYSQL_DATABASE
   });
 
-  describe('#constructor()', function () {
-    it('throws error when "database" property is absent', function () {
-      assert.throws(() => new Database({}), TypeError);
-      assert.doesNotThrow(() => new Database({database: 'str'}), TypeError);
+  describe('#constructor()', () => {
+    it('throws error when "database" property is absent', () => {
+      assert.throws(() => new Database({ }), TypeError);
+      assert.doesNotThrow(() => new Database({ database: 'str' }), TypeError);
     });
 
-    it('throws error when "database" property is invalid', function () {
-      assert.throws(() => new Database({database: 123}), TypeError);
-      assert.throws(() => new Database({database: true}), TypeError);
-      assert.throws(() => new Database({database: {}}), TypeError);
+    it('throws error when "database" property is invalid', () => {
+      assert.throws(() => new Database({ database: 123 }), TypeError);
+      assert.throws(() => new Database({ database: true }), TypeError);
+      assert.throws(() => new Database({ database: {} }), TypeError);
     });
 
-    it('throws error when "host" property is invalid', function () {
-      assert.throws(() => new Database({database: 'str', host: 123}), TypeError);
-      assert.throws(() => new Database({database: 'str', host: true}), TypeError);
-      assert.throws(() => new Database({database: 'str', host: {}}), TypeError);
+    it('throws error when "host" property is invalid', () => {
+      assert.throws(() => new Database({ database: 'str', host: 123 }), TypeError);
+      assert.throws(() => new Database({ database: 'str', host: true }), TypeError);
+      assert.throws(() => new Database({ database: 'str', host: {} }), TypeError);
     });
 
-    it('throws error when "port" property is invalid', function () {
-      assert.throws(() => new Database({database: 'str', port: 'str'}), TypeError);
-      assert.throws(() => new Database({database: 'str', port: true}), TypeError);
-      assert.throws(() => new Database({database: 'str', port: {}}), TypeError);
+    it('throws error when "port" property is invalid', () => {
+      assert.throws(() => new Database({ database: 'str', port: 'str' }), TypeError);
+      assert.throws(() => new Database({ database: 'str', port: true }), TypeError);
+      assert.throws(() => new Database({ database: 'str', port: {} }), TypeError);
     });
 
-    it('throws error when "user" property is invalid', function () {
-      assert.throws(() => new Database({database: 'str', user: 123}), TypeError);
-      assert.throws(() => new Database({database: 'str', user: true}), TypeError);
-      assert.throws(() => new Database({database: 'str', user: {}}), TypeError);
+    it('throws error when "user" property is invalid', () => {
+      assert.throws(() => new Database({ database: 'str', user: 123 }), TypeError);
+      assert.throws(() => new Database({ database: 'str', user: true }), TypeError);
+      assert.throws(() => new Database({ database: 'str', user: {} }), TypeError);
     });
 
-    it('throws error when "password" property is invalid', function () {
-      assert.throws(() => new Database({database: 'str', password: 123}), TypeError);
-      assert.throws(() => new Database({database: 'str', password: true}), TypeError);
-      assert.throws(() => new Database({database: 'str', password: {}}), TypeError);
-    });
-  });
-
-  describe('#query()', function () {
-    it('throws error when "sql" is unspecified', function () {
-      assert.throws(() => db.query(), TypeError);
-    });
-
-    it('throws error when "sql" is invalid', function () {
-      assert.throws(() => db.query(123), TypeError);
-      assert.throws(() => db.query(true), TypeError);
-      assert.throws(() => db.query({}), TypeError);
-      assert.throws(() => db.query(null), TypeError);
-    });
-
-    it('throws error when "params" is invalid', function () {
-      assert.throws(() => db.query('SELECT 1;', 123), TypeError);
-      assert.throws(() => db.query('SELECT 1;', true), TypeError);
-      assert.throws(() => db.query('SELECT 1;', 'str'), TypeError);
-      assert.throws(() => db.query('SELECT 1;', null), TypeError);
-    });
-
-    it('throws error when "options" is invalid', function () {
-      assert.throws(() => db.query('SELECT 1;', [], 123), TypeError);
-      assert.throws(() => db.query('SELECT 1;', [], true), TypeError);
-      assert.throws(() => db.query('SELECT 1;', [], 'str'), TypeError);
-      assert.throws(() => db.query('SELECT 1;', [], null), TypeError);
-      assert.throws(() => db.query('SELECT 1;', [], []), TypeError);
+    it('throws error when "password" property is invalid', () => {
+      assert.throws(() => new Database({ database: 'str', password: 123 }), TypeError);
+      assert.throws(() => new Database({ database: 'str', password: true }), TypeError);
+      assert.throws(() => new Database({ database: 'str', password: {} }), TypeError);
     });
   });
 
-  describe('@connected', function () {
-    before(function (done) {
+  describe('#query()', () => {
+    it('throws error when "sql" is unspecified', () => {
+      assert.throws(() => db.execute(), TypeError);
+    });
+
+    it('throws error when "sql" is invalid', () => {
+      assert.throws(() => db.execute(123), TypeError);
+      assert.throws(() => db.execute(true), TypeError);
+      assert.throws(() => db.execute({ }), TypeError);
+      assert.throws(() => db.execute(null), TypeError);
+    });
+
+    it('throws error when "params" is invalid', () => {
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: 123 }), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: true }), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: 'str' }), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: null }), TypeError);
+    });
+
+    it('throws error when "options" is invalid', () => {
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, 123), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, true), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, 'str'), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, null), TypeError);
+      assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, []), TypeError);
+    });
+  });
+
+  describe('@connected', () => {
+    before((done) => {
       db.connect(done);
     });
 
-    after(function (done) {
+    after((done) => {
       db.disconnect(done);
     });
 
-    describe('#isConnected', function () {
-      it('equals true', function () {
+    describe('#isConnected', () => {
+      it('equals true', () => {
         assert.strictEqual(db.isConnected, true);
       });
     });
 
-    describe('#query()', function () {
-      it('returns records when supplied with sql', function (done) {
+    describe('#execute()', () => {
+      it('returns records when supplied with sql', (done) => {
         const sql = 'SELECT id FROM `employees`;';
 
-        db.query(sql)
-          .then(function (records) {
+        db.execute({ sql })
+          .then((records) => {
             assert.isArray(records);
             assert.isObject(records[0]);
             assert.property(records[0], 'id');
@@ -106,12 +105,12 @@ describe('Database', function () {
           });
       });
 
-      it('returns records when supplied with sql + params', function (done) {
+      it('returns records when supplied with sql + params', (done) => {
         const sql = 'SELECT id FROM `employees` WHERE firstname = ? AND lastname = ?;';
         const params = ['Jordan', 'Belfort'];
 
-        db.query(sql, params)
-          .then(function (records) {
+        db.execute({ sql, params })
+          .then((records) => {
             assert.isArray(records);
             assert.isObject(records[0]);
             assert.property(records[0], 'id', 1);
@@ -119,12 +118,13 @@ describe('Database', function () {
           });
       });
 
-      it('returns records when supplied with sql + params + options', function (done) {
+      it('returns records when supplied with sql + params + options', (done) => {
         const sql = 'SELECT id FROM `employees` WHERE firstname = ? AND lastname = ?;';
         const params = ['Jordan', 'Belfort'];
 
-        db.query(sql, params, {nestTables: true})
-          .then(function (records) {
+        db.execute({ sql, params }, { nestTables: true })
+
+          .then((records) => {
             assert.isArray(records);
             assert.isObject(records[0]);
             assert.isObject(records[0].employees);
@@ -133,11 +133,12 @@ describe('Database', function () {
           });
       });
 
-      it('returns records when supplied with sql + options', function (done) {
+      it('returns records when supplied with sql + options', (done) => {
         const sql = 'SELECT 1 AS \'num\';';
 
-        db.query(sql, {nestTables: true})
-          .then(function (records) {
+        db.execute({ sql }, { nestTables: true })
+
+          .then((records) => {
             assert.isArray(records);
             assert.isObject(records[0]);
             assert.isObject(records[0]['']);
@@ -148,9 +149,9 @@ describe('Database', function () {
     });
   });
 
-  describe('@disconnected', function () {
-    describe('#isConnected', function () {
-      it('equals false', function () {
+  describe('@disconnected', () => {
+    describe('#isConnected', () => {
+      it('equals false', () => {
         assert.strictEqual(db.isConnected, false);
       });
     });

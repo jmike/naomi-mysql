@@ -1,10 +1,10 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileRemoveQuery from '../../src/querycompilers/remove';
 
-describe('Remove query compiler', function () {
-  it('accepts props with table, selection, orderby and limit', function () {
+describe('Remove query compiler', () => {
+  it('accepts props with table, selection, orderby and limit', () => {
     const query = compileRemoveQuery({
       collection: [
         'COLLECTION',

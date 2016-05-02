@@ -1,10 +1,10 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileFindQuery from '../../src/querycompilers/find';
 
-describe('Find query compiler', function () {
-  it('accepts props with table + empty projection, selection, orderby, limit and offset', function () {
+describe('Find query compiler', () => {
+  it('accepts props with table + empty projection, selection, orderby, limit and offset', () => {
     const query = compileFindQuery({
       collection: [
         'COLLECTION',
@@ -21,7 +21,7 @@ describe('Find query compiler', function () {
     assert.deepEqual(query.params, []);
   });
 
-  it('accepts props with table, projection, selection, orderby, limit and offset', function () {
+  it('accepts props with table, projection, selection, orderby, limit and offset', () => {
     const query = compileFindQuery({
       collection: [
         'COLLECTION',
@@ -45,7 +45,8 @@ describe('Find query compiler', function () {
       offset: ['OFFSET', 20]
     });
 
-    assert.strictEqual(query.sql, 'SELECT `firstname`, `lastname` FROM `employees` WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
+    assert.strictEqual(query.sql, 'SELECT `firstname`, `lastname` FROM `employees` ' +
+      'WHERE `age` = ? ORDER BY `firstname` ASC, `id` DESC LIMIT 10 OFFSET 20;');
     assert.deepEqual(query.params, [23]);
   });
 });

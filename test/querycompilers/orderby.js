@@ -1,10 +1,10 @@
-/* global describe, it, before, after */
+/* eslint-env node, mocha */
 
-import {assert} from 'chai';
+import { assert } from 'chai';
 import compileOrderBy from '../../src/querycompilers/orderBy';
 
-describe('OrderBy compiler', function () {
-  it('accepts valid AST', function () {
+describe('OrderBy compiler', () => {
+  it('accepts valid AST', () => {
     const query = compileOrderBy([
       'ORDERBY',
       ['ASC', ['KEY', 'name']],
