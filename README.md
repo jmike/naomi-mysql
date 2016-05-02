@@ -1,8 +1,12 @@
-# Naomi v2+ MySQL Connector
+# Naomi MySQL Connector
 
-MySQL connector for Naomi v2 ORM.
+MySQL connector for Naomi v.2+ ORM.
 
-[![Build Status](https://travis-ci.org/jmike/naomi-mysql.png?branch=master)](https://travis-ci.org/jmike/naomi-mysql)
+[![Build Status](https://travis-ci.org/jmike/naomi-mysql.svg?branch=master)](https://travis-ci.org/jmike/naomi-mysql) [![npm version](https://badge.fury.io/js/naomi-mysql.svg)](https://badge.fury.io/js/naomi-mysql)
+
+## Documentation
+
+For info on how to use this library please visit the [Naomi Docs](https://github.com/jmike/naomi-docs).
 
 ## Support
 
