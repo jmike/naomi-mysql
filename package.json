@@ -1,6 +1,6 @@
 {
   "name": "naomi-mysql",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "MySQL connector for the Naomi v.2+ ORM.",
   "main": "lib/naomi.js",
   "scripts": {
@@ -40,7 +40,7 @@
     "customerror": "^1.0.1",
     "lodash": "^4.6.1",
     "mysql": "^2.10.2",
-    "naomi": "^2.0.1",
+    "naomi": "^2.2.0",
     "require-directory": "^2.1.1",
     "type-of": "^2.0.1"
   },
