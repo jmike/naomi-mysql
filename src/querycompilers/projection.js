@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type from 'type-of';
 import compileKey from './key';
 
 /**
@@ -6,15 +7,20 @@ import compileKey from './key';
  * @param {Array} ast abstract syntax tree, as given by the QueryParser.
  * @return {Object}
  */
-function compile(ast: Array): Object {
-  // make sure AST function is valid
+function compile(ast) {
+  // make sure ast is array
+  if (!_.isArray(ast)) {
+    throw new TypeError(`Invalid "ast" argument; expected array, received ${type(ast)}`);
+  }
+
+  // make sure ast function is "PROJECTION"
   if (ast[0] !== 'PROJECTION') {
     throw new TypeError(`Invalid AST function; expected "PROJECTION", received "${ast[0]}"`);
   }
 
-  // handle null argument
+  // handle nil ast argument
   if (_.isNil(ast[1])) {
-    return {sql: '*', params: []};
+    return { sql: '*', params: [] };
   }
 
   const sql = [];
@@ -30,7 +36,7 @@ function compile(ast: Array): Object {
     }
   });
 
-  return {params, sql: sql.join(', ')};
+  return { params, sql: sql.join(', ') };
 }
 
 export default compile;

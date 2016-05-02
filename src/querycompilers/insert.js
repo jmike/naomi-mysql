@@ -1,3 +1,5 @@
+import _ from 'lodash';
+import type from 'type-of';
 import escapeIdentifier from './escape';
 import compileCollection from './collection';
 
@@ -10,7 +12,27 @@ import compileCollection from './collection';
  * @param {boolean} props.ignore enables "IGNORE" mode if set to true.
  * @return {Object}
  */
-function compile(props: {collection: Array, keys: Array<string>, values: Array<Object>, ignore: ?boolean}): Object {
+function compile(props) {
+  // make sure props is object
+  if (!_.isObject(props)) {
+    throw new TypeError(`Invalid "props" argument; expected object, received ${type(props)}`);
+  }
+
+  // make sure props contains collection ast
+  if (!_.isArray(props.collection)) {
+    throw new TypeError(`Invalid "collection" property; expected array, received ${type(props.collection)}`);
+  }
+
+  // make sure props contains keys
+  if (!_.isArray(props.keys)) {
+    throw new TypeError(`Invalid "keys" property; expected array, received ${type(props.keys)}`);
+  }
+
+  // make sure props contains values
+  if (!_.isArray(props.values)) {
+    throw new TypeError(`Invalid "values" property; expected array, received ${type(props.values)}`);
+  }
+
   const sql = [];
   let params = [];
 
@@ -40,7 +62,7 @@ function compile(props: {collection: Array, keys: Array<string>, values: Array<O
 
   sql.push('VALUES', values);
 
-  return {params, sql: sql.join(' ') + ';'};
+  return { params, sql: `${sql.join(' ')};` };
 }
 
 export default compile;

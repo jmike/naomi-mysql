@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import mysql from 'mysql';
 import type from 'type-of';
 import Database from 'naomi/lib/Database';
-import Schema from './Schema';
+// import Schema from './Schema';
 import Collection from './Collection';
 
 class MySqlDatabase extends Database {
@@ -20,7 +20,7 @@ class MySqlDatabase extends Database {
    * @throws {TypeError} if arguments are of invalid type
    * @constructor
    */
-  constructor(connectionProperties: {database: string, host: ?string, port: ?number, user: ?string, password: ?string, connectionLimit: ?number}) {
+  constructor(connectionProperties) {
     // handle optional connection props
     connectionProperties = _.defaults(connectionProperties, {
       host: 'localhost',
@@ -30,20 +30,44 @@ class MySqlDatabase extends Database {
       connectionLimit: 10
     });
 
+    // validate connectionProperties
+    if (!_.isString(connectionProperties.database)) {
+      throw new TypeError('Invalid "database" property in "connectionProperties" argument; ' +
+        `expected string, received ${type(connectionProperties.database)}`);
+    }
+
+    if (!_.isString(connectionProperties.host)) {
+      throw new TypeError('Invalid "host" property in "connectionProperties" argument; ' +
+        `expected string, received ${type(connectionProperties.host)}`);
+    }
+
+    if (!_.isInteger(connectionProperties.port)) {
+      throw new TypeError('Invalid "port" property in "connectionProperties" argument; ' +
+        `expected integer, received ${type(connectionProperties.port)}`);
+    }
+
+    if (!_.isString(connectionProperties.user)) {
+      throw new TypeError('Invalid "user" property in "connectionProperties" argument; ' +
+        `expected string, received ${type(connectionProperties.user)}`);
+    }
+
+    if (!_.isString(connectionProperties.password)) {
+      throw new TypeError('Invalid "password" property in "connectionProperties" argument; ' +
+        `expected string, received ${type(connectionProperties.password)}`);
+    }
+
+    if (!_.isInteger(connectionProperties.connectionLimit)) {
+      throw new TypeError('Invalid "connectionLimit" property in "connectionProperties" argument; ' +
+        `expected integer, received ${type(connectionProperties.connectionLimit)}`);
+    }
+
     super(connectionProperties);
 
     this.name = connectionProperties.database;
     this._pool = null;
   }
 
-  /**
-   * Connects to the database using the connection properties specified at construction time.
-   * @param {Function<err>} [callback] an optional callback function.
-   * @returns {Promise} a bluebird promise
-   * @throws {TypeError} if arguments are of invalid type
-   * @emits Database#connect
-   */
-  connect(callback: ?Function): Promise {
+  connect(callback) {
     // check if already connected
     if (this.isConnected) {
       return Promise.resolve().nodeify(callback);
@@ -62,16 +86,7 @@ class MySqlDatabase extends Database {
       .nodeify(callback);
   }
 
-
-  /**
-   * Disconnects from the database.
-   * Please note: the database instance will become practically useless after calling this method.
-   * @param {Function<Error>} [callback] an optional callback function.
-   * @returns {Promise} a bluebird promise
-   * @throws {TypeError} if arguments are of invalid type
-   * @emits Database#disconnect
-   */
-  disconnect(callback: ?Function): Promise {
+  disconnect(callback) {
     // check if already disconnected
     if (!this.isConnected) {
       return Promise.resolve().nodeify(callback);
@@ -80,7 +95,11 @@ class MySqlDatabase extends Database {
     // disconnect
     return new Promise((resolve, reject) => {
       this._pool.end((err) => {
-        if (err) return reject(err);
+        if (err) {
+          reject(err);
+          return; // exit
+        }
+
         resolve();
       });
     })
@@ -93,37 +112,30 @@ class MySqlDatabase extends Database {
       .nodeify(callback);
   }
 
-  /**
-   * Runs the given parameterized SQL statement.
-   * @param {string} sql the SQL statement.
-   * @param {Array} [params] an array of parameter values.
-   * @param {Object} [options] query options.
-   * @param {Function} [callback] a callback function with (err, records) arguments.
-   * @returns {Promise} a bluebird promise resolving to the query results.
-   * @throws {TypeError} if arguments are of invalid type
-   */
-  query(sql: string, params: ?Object | Function, options: ?Object | Function, callback: ?Function): Promise {
-    // handle optional arguments
-    if (_.isFunction(params)) {
-      callback = params;
-      options = {};
-      params = [];
-    } else if (_.isPlainObject(params)) {
-      options = params;
-      params = [];
-    } else if (_.isUndefined(params)) {
-      params = [];
-    } else if (!_.isArray(params)) {
-      throw new TypeError(`Invalid params argument; expected array, received ${type(params)}`);
+  execute(query, options, callback) {
+    // validate query
+    if (!_.isObject(query)) {
+      throw new TypeError(`Invalid "query" argument; expected object, received ${type(query)}`);
     }
 
+    if (!_.isString(query.sql)) {
+      throw new TypeError('Invalid "sql" property in "query" argument; ' +
+        `expected string, received ${type(query.sql)}`);
+    }
+
+    if (!_.isArray(query.params)) {
+      throw new TypeError('Invalid "params" property in "query" argument; ' +
+        `expected array, received ${type(query.params)}`);
+    }
+
+    // validate options
     if (_.isFunction(options)) {
       callback = options;
       options = {};
     } else if (_.isUndefined(options)) {
       options = {};
     } else if (!_.isPlainObject(options)) {
-      throw new TypeError(`Invalid options argument; expected plain object, received ${type(options)}`);
+      throw new TypeError(`Invalid "options" argument; expected plain object, received ${type(options)}`);
     }
 
     // make sure db is connected
@@ -134,7 +146,7 @@ class MySqlDatabase extends Database {
 
       // run query using connection
       .then((connection) => {
-        return this._queryConnection(connection, sql, params, options)
+        return this._queryConnection(connection, query.sql, query.params, options)
 
           // always release previously acquired connection
           .finally(() => {
@@ -153,7 +165,11 @@ class MySqlDatabase extends Database {
   _acquireConnection() {
     return new Promise((resolve, reject) => {
       this._pool.getConnection((err, connection) => {
-        if (err) return reject(err);
+        if (err) {
+          reject(err);
+          return; // exit
+        }
+
         resolve(connection);
       });
     });
@@ -184,11 +200,15 @@ class MySqlDatabase extends Database {
     // promisify query logic
     return new Promise((resolve, reject) => {
       connection.query(options, params, (err, records) => {
-        if (err) return reject(err);
+        if (err) {
+          reject(err);
+          return; // exit
+        }
 
         // handle SELECT statement response
         if (_.isArray(records)) {
-          return resolve(records); // exit
+          resolve(records);
+          return; // exit
         }
 
         // handle DML statement response
@@ -200,13 +220,7 @@ class MySqlDatabase extends Database {
     });
   }
 
-  /**
-   * Creates and returns a new Collection with the specified properties.
-   * @param {string} name the name of the collection.
-   * @param {(Object, Schema)} [schema] optional collection schema.
-   * @type {Collection}
-   */
-  collection(name: string, schema: Schema | ?Object): Collection {
+  collection(name, schema = {}) {
     return new Collection(this, name, schema);
   }
 

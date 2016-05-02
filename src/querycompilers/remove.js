@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type from 'type-of';
 import compileCollection from './collection';
 import compileSelection from './selection';
 import compileOrderBy from './orderBy';
@@ -13,7 +14,32 @@ import compileLimit from './limit';
  * @param {Array} props.limit limit AST.
  * @return {Object}
  */
-function compile(props: {collection: Array, selection: Array, orderby: Array, limit: Array}): Object {
+function compile(props) {
+  // make sure props is object
+  if (!_.isObject(props)) {
+    throw new TypeError(`Invalid "props" argument; expected object, received ${type(props)}`);
+  }
+
+  // make sure props contains collection ast
+  if (!_.isArray(props.collection)) {
+    throw new TypeError(`Invalid "collection" property; expected array, received ${type(props.collection)}`);
+  }
+
+  // make sure props contains selection ast
+  if (!_.isArray(props.selection)) {
+    throw new TypeError(`Invalid "selection" property; expected array, received ${type(props.selection)}`);
+  }
+
+  // make sure props contains orderby ast
+  if (!_.isArray(props.orderby)) {
+    throw new TypeError(`Invalid "orderby" property; expected array, received ${type(props.orderby)}`);
+  }
+
+  // make sure props contains limit ast
+  if (!_.isArray(props.limit)) {
+    throw new TypeError(`Invalid "limit" property; expected array, received ${type(props.limit)}`);
+  }
+
   const sql = [];
   let params = [];
 
@@ -41,7 +67,7 @@ function compile(props: {collection: Array, selection: Array, orderby: Array, li
     params = params.concat(limit.params);
   }
 
-  return {params, sql: sql.join(' ') + ';'};
+  return { params, sql: `${sql.join(' ')};` };
 }
 
 export default compile;

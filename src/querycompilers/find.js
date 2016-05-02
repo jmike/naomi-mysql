@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type from 'type-of';
 import compileCollection from './collection';
 import compileProjection from './projection';
 import compileSelection from './selection';
@@ -17,7 +18,42 @@ import compileOffset from './offset';
  * @param {Array} props.offset offset AST.
  * @return {Object}
  */
-function compile(props: {collection: Array, selection: Array, projection: Array, orderby: Array, limit: Array, offset: Array}): Object {
+function compile(props) {
+  // make sure props is object
+  if (!_.isObject(props)) {
+    throw new TypeError(`Invalid "props" argument; expected object, received ${type(props)}`);
+  }
+
+  // make sure props contains collection ast
+  if (!_.isArray(props.collection)) {
+    throw new TypeError(`Invalid "collection" property; expected array, received ${type(props.collection)}`);
+  }
+
+  // make sure props contains selection ast
+  if (!_.isArray(props.selection)) {
+    throw new TypeError(`Invalid "selection" property; expected array, received ${type(props.selection)}`);
+  }
+
+  // make sure props contains projection ast
+  if (!_.isArray(props.projection)) {
+    throw new TypeError(`Invalid "projection" property; expected array, received ${type(props.projection)}`);
+  }
+
+  // make sure props contains orderby ast
+  if (!_.isArray(props.orderby)) {
+    throw new TypeError(`Invalid "orderby" property; expected array, received ${type(props.orderby)}`);
+  }
+
+  // make sure props contains limit ast
+  if (!_.isArray(props.limit)) {
+    throw new TypeError(`Invalid "limit" property; expected array, received ${type(props.limit)}`);
+  }
+
+  // make sure props contains offset ast
+  if (!_.isArray(props.offset)) {
+    throw new TypeError(`Invalid "offset" property; expected array, received ${type(props.offset)}`);
+  }
+
   const sql = [];
   let params = [];
 
@@ -55,7 +91,7 @@ function compile(props: {collection: Array, selection: Array, projection: Array,
     }
   }
 
-  return {params, sql: sql.join(' ') + ';'};
+  return { params, sql: `${sql.join(' ')};` };
 }
 
 export default compile;

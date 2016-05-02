@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type from 'type-of';
 import compileKey from './key';
 
 /**
@@ -7,11 +8,11 @@ import compileKey from './key';
  * @return {Object}
  * @private
  */
-function compileValue(ast: Array): Object {
+function compileValue(ast) {
   const sql = '?';
   const params = [ast[1]];
 
-  return {params, sql};
+  return { params, sql };
 }
 
 /**
@@ -20,7 +21,7 @@ function compileValue(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileValues(ast: Array): Object {
+function compileValues(ast) {
   const sql = [];
   const params = [];
 
@@ -29,7 +30,7 @@ function compileValues(ast: Array): Object {
     params.push(e);
   });
 
-  return {params, sql: '(' + sql.join(', ') + ')'};
+  return { params, sql: `(${sql.join(', ')})` };
 }
 
 /**
@@ -38,7 +39,7 @@ function compileValues(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileEqual(ast: Array): Object {
+function compileEqual(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -52,7 +53,7 @@ function compileEqual(ast: Array): Object {
     params = params.concat(value.params);
   }
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -61,7 +62,7 @@ function compileEqual(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileNotEqual(ast: Array): Object {
+function compileNotEqual(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -75,7 +76,7 @@ function compileNotEqual(ast: Array): Object {
     params = params.concat(value.params);
   }
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -84,7 +85,7 @@ function compileNotEqual(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileGreaterThan(ast: Array): Object {
+function compileGreaterThan(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -94,7 +95,7 @@ function compileGreaterThan(ast: Array): Object {
   sql.push('>', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -103,7 +104,7 @@ function compileGreaterThan(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileGreaterThanOrEqual(ast: Array): Object {
+function compileGreaterThanOrEqual(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -113,7 +114,7 @@ function compileGreaterThanOrEqual(ast: Array): Object {
   sql.push('>=', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -122,7 +123,7 @@ function compileGreaterThanOrEqual(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileLessThan(ast: Array): Object {
+function compileLessThan(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -132,7 +133,7 @@ function compileLessThan(ast: Array): Object {
   sql.push('<', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -141,7 +142,7 @@ function compileLessThan(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileLessThanOrEqual(ast: Array): Object {
+function compileLessThanOrEqual(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -151,7 +152,7 @@ function compileLessThanOrEqual(ast: Array): Object {
   sql.push('<=', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -160,7 +161,7 @@ function compileLessThanOrEqual(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileIn(ast: Array): Object {
+function compileIn(ast) {
   const key = compileKey(ast[1]);
   const values = compileValues(ast[2]);
 
@@ -170,7 +171,7 @@ function compileIn(ast: Array): Object {
   sql.push('IN', values.sql);
   params = params.concat(values.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -179,7 +180,7 @@ function compileIn(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileNotIn(ast: Array): Object {
+function compileNotIn(ast) {
   const key = compileKey(ast[1]);
   const values = compileValues(ast[2]);
 
@@ -189,7 +190,7 @@ function compileNotIn(ast: Array): Object {
   sql.push('NOT IN', values.sql);
   params = params.concat(values.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -198,7 +199,7 @@ function compileNotIn(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileLike(ast: Array): Object {
+function compileLike(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -208,7 +209,7 @@ function compileLike(ast: Array): Object {
   sql.push('LIKE', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -217,7 +218,7 @@ function compileLike(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileNotLike(ast: Array): Object {
+function compileNotLike(ast) {
   const key = compileKey(ast[1]);
   const value = compileValue(ast[2]);
 
@@ -227,7 +228,7 @@ function compileNotLike(ast: Array): Object {
   sql.push('NOT LIKE', value.sql);
   params = params.concat(value.params);
 
-  return {params, sql: sql.join(' ')};
+  return { params, sql: sql.join(' ') };
 }
 
 /**
@@ -236,9 +237,10 @@ function compileNotLike(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileAnd(ast: Array): Object {
+function compileAnd(ast) {
+  // make sure ast function is "AND"
   if (ast[0] !== 'AND') {
-    throw new TypeError(`Invalid AST function; expected "AND", received "${ast[0]}"`);
+    throw new TypeError(`Invalid "ast" argument; expected "AND" at position 0, received "${ast[0]}"`);
   }
 
   const sql = [];
@@ -246,11 +248,11 @@ function compileAnd(ast: Array): Object {
 
   _.tail(ast).forEach((e) => {
     const expr = compile(['SELECTION', e]); // eslint-disable-line no-use-before-define
-    sql.push('(' + expr.sql + ')');
+    sql.push(`(${expr.sql})`);
     params = params.concat(expr.params);
   });
 
-  return {params, sql: sql.join(' AND ')};
+  return { params, sql: sql.join(' AND ') };
 }
 
 /**
@@ -259,9 +261,10 @@ function compileAnd(ast: Array): Object {
  * @return {Object}
  * @private
  */
-function compileOr(ast: Array): Object {
+function compileOr(ast) {
+  // make sure ast function is "OR"
   if (ast[0] !== 'OR') {
-    throw new TypeError(`Invalid AST function; expected "OR", received "${ast[0]}"`);
+    throw new TypeError(`Invalid "ast" argument; expected "OR" at position 0, received "${ast[0]}"`);
   }
 
   const sql = [];
@@ -269,11 +272,11 @@ function compileOr(ast: Array): Object {
 
   _.tail(ast).forEach((e) => {
     const expr = compile(['SELECTION', e]); // eslint-disable-line no-use-before-define
-    sql.push('(' + expr.sql + ')');
+    sql.push(`(${expr.sql})`);
     params = params.concat(expr.params);
   });
 
-  return {params, sql: sql.join(' OR ')};
+  return { params, sql: sql.join(' OR ') };
 }
 
 /**
@@ -281,42 +284,50 @@ function compileOr(ast: Array): Object {
  * @param {Array} ast abstract syntax tree, as given by the QueryParser.
  * @return {Object}
  */
-function compile(ast: Array): Object {
+function compile(ast) {
+  // make sure ast is array
+  if (!_.isArray(ast)) {
+    throw new TypeError(`Invalid "ast" argument; expected array, received ${type(ast)}`);
+  }
+
+  // make sure ast function is "SELECTION"
   if (ast[0] !== 'SELECTION') {
     throw new TypeError(`Invalid AST function; expected "SELECTION", received "${ast[0]}"`);
   }
 
+  // handle nil ast argument
   if (_.isNil(ast[1])) {
-    return {sql: '', params: []};
+    return { sql: '', params: [] };
   }
 
+  // parse ast argument
   switch (ast[1][0]) {
-  case 'EQ':
-    return compileEqual(ast[1]);
-  case 'NE':
-    return compileNotEqual(ast[1]);
-  case 'GT':
-    return compileGreaterThan(ast[1]);
-  case 'GTE':
-    return compileGreaterThanOrEqual(ast[1]);
-  case 'LT':
-    return compileLessThan(ast[1]);
-  case 'LTE':
-    return compileLessThanOrEqual(ast[1]);
-  case 'IN':
-    return compileIn(ast[1]);
-  case 'NIN':
-    return compileNotIn(ast[1]);
-  case 'LIKE':
-    return compileLike(ast[1]);
-  case 'NLIKE':
-    return compileNotLike(ast[1]);
-  case 'AND':
-    return compileAnd(ast[1]);
-  case 'OR':
-    return compileOr(ast[1]);
-  default:
-    throw new TypeError(`Invalid AST; unknown identifier "${ast[0]}"`);
+    case 'EQ':
+      return compileEqual(ast[1]);
+    case 'NE':
+      return compileNotEqual(ast[1]);
+    case 'GT':
+      return compileGreaterThan(ast[1]);
+    case 'GTE':
+      return compileGreaterThanOrEqual(ast[1]);
+    case 'LT':
+      return compileLessThan(ast[1]);
+    case 'LTE':
+      return compileLessThanOrEqual(ast[1]);
+    case 'IN':
+      return compileIn(ast[1]);
+    case 'NIN':
+      return compileNotIn(ast[1]);
+    case 'LIKE':
+      return compileLike(ast[1]);
+    case 'NLIKE':
+      return compileNotLike(ast[1]);
+    case 'AND':
+      return compileAnd(ast[1]);
+    case 'OR':
+      return compileOr(ast[1]);
+    default:
+      throw new TypeError(`Invalid "ast" argument; unknown identifier "${ast[1][0]}" at position 1:0`);
   }
 }
 

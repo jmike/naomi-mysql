@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type from 'type-of';
 import compileKey from './key';
 
 /**
@@ -6,21 +7,26 @@ import compileKey from './key';
  * @param {Array} ast abstract syntax tree, as given by the QueryParser.
  * @return {Object}
  */
-function compile(ast: Array): Object {
-  // make sure AST function is valid
-  if (ast[0] !== 'ORDERBY') {
-    throw new TypeError(`Invalid AST function; expected "ORDERBY", received "${ast[0]}"`);
+function compile(ast) {
+  // make sure ast is array
+  if (!_.isArray(ast)) {
+    throw new TypeError(`Invalid "ast" argument; expected array, received ${type(ast)}`);
   }
 
-  // handle nil argument
+  // make sure ast function is "ORDERBY"
+  if (ast[0] !== 'ORDERBY') {
+    throw new TypeError(`Invalid "ast" argument; expected "ORDERBY" at position 0, received "${ast[0]}"`);
+  }
+
+  // handle nil ast argument
   if (_.isNil(ast[1])) {
-    return {sql: '', params: []};
+    return { sql: '', params: [] };
   }
 
   const sql = [];
   let params = [];
 
-  _.tail(ast).forEach((arr) => {
+  _.tail(ast).forEach((arr, i) => {
     if (arr[0] === 'DESC') {
       const key = compileKey(arr[1]);
       sql.push(`${key.sql} DESC`);
@@ -30,11 +36,11 @@ function compile(ast: Array): Object {
       sql.push(`${key.sql} ASC`);
       params = params.concat(key.params);
     } else {
-      throw new TypeError(`Invalid AST; expected "ASC" or "DESC", received "${ast[0]}"`);
+      throw new TypeError(`Invalid "ast" argument; expected "ASC" or "DESC" at position ${i}:0, received "${ast[0]}"`);
     }
   });
 
-  return {params, sql: sql.join(', ')};
+  return { params, sql: sql.join(', ') };
 }
 
 export default compile;
