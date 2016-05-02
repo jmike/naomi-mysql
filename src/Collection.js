@@ -83,15 +83,16 @@ class MySqlCollection extends Collection {
       callback = selector;
       selector = undefined;
       options = {};
-    } else if (
-      !_.isBoolean(selector) &&
-      !_.isNumber(selector) &&
-      !_.isString(selector) &&
-      !_.isDate(selector) &&
-      !_.isPlainObject(selector) &&
-      !_.isArray(selector) &&
-      !Buffer.isBuffer(selector)
-    ) {
+    } else if (!(
+      _.isUndefined(selector) ||
+      _.isBoolean(selector) ||
+      _.isNumber(selector) ||
+      _.isString(selector) ||
+      _.isDate(selector) ||
+      _.isPlainObject(selector) ||
+      _.isArray(selector) ||
+      Buffer.isBuffer(selector)
+    )) {
       throw new TypeError('Invalid "selector" argument; ' +
         'expected boolean, number, string, date, object, array or buffer ' +
         `received ${type(selector)}`);
@@ -136,15 +137,16 @@ class MySqlCollection extends Collection {
       callback = selector;
       selector = undefined;
       options = {};
-    } else if (
-      !_.isBoolean(selector) &&
-      !_.isNumber(selector) &&
-      !_.isString(selector) &&
-      !_.isDate(selector) &&
-      !_.isPlainObject(selector) &&
-      !_.isArray(selector) &&
-      !Buffer.isBuffer(selector)
-    ) {
+    } else if (!(
+      _.isUndefined(selector) ||
+      _.isBoolean(selector) ||
+      _.isNumber(selector) ||
+      _.isString(selector) ||
+      _.isDate(selector) ||
+      _.isPlainObject(selector) ||
+      _.isArray(selector) ||
+      Buffer.isBuffer(selector)
+    )) {
       throw new TypeError('Invalid "selector" argument; ' +
         'expected boolean, number, string, date, object, array or buffer ' +
         `received ${type(selector)}`);
@@ -194,15 +196,16 @@ class MySqlCollection extends Collection {
       callback = selector;
       selector = undefined;
       options = {};
-    } else if (
-      !_.isBoolean(selector) &&
-      !_.isNumber(selector) &&
-      !_.isString(selector) &&
-      !_.isDate(selector) &&
-      !_.isPlainObject(selector) &&
-      !_.isArray(selector) &&
-      !Buffer.isBuffer(selector)
-    ) {
+    } else if (!(
+      _.isUndefined(selector) ||
+      _.isBoolean(selector) ||
+      _.isNumber(selector) ||
+      _.isString(selector) ||
+      _.isDate(selector) ||
+      _.isPlainObject(selector) ||
+      _.isArray(selector) ||
+      Buffer.isBuffer(selector)
+    )) {
       throw new TypeError('Invalid "selector" argument; ' +
         'expected boolean, number, string, date, object, array or buffer ' +
         `received ${type(selector)}`);
@@ -250,15 +253,16 @@ class MySqlCollection extends Collection {
       callback = selector;
       selector = undefined;
       options = {};
-    } else if (
-      !_.isBoolean(selector) &&
-      !_.isNumber(selector) &&
-      !_.isString(selector) &&
-      !_.isDate(selector) &&
-      !_.isPlainObject(selector) &&
-      !_.isArray(selector) &&
-      !Buffer.isBuffer(selector)
-    ) {
+    } else if (!(
+      _.isUndefined(selector) ||
+      _.isBoolean(selector) ||
+      _.isNumber(selector) ||
+      _.isString(selector) ||
+      _.isDate(selector) ||
+      _.isPlainObject(selector) ||
+      _.isArray(selector) ||
+      Buffer.isBuffer(selector)
+    )) {
       throw new TypeError('Invalid "selector" argument; ' +
         'expected boolean, number, string, date, object, array or buffer ' +
         `received ${type(selector)}`);
@@ -311,7 +315,7 @@ class MySqlCollection extends Collection {
       options = {};
     }
 
-    // validate records
+    // validate records content
     return Promise.map(records, (record) => this.schema.validate(record))
 
       // compile + run query
