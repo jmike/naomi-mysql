@@ -1,3 +1,11 @@
+## 2.1.0 - 2016-05-02
+
+* Change babel settings to produce code compatible with node v.4+.
+* Update eslint settings - use the latest airbnb styleguide.
+* Update dependencies: lodash@4.11.2, bluebird@3.3.5, naomi@2.2.0.
+* Add naomi-docs as homepage to package.json.
+* Remove gulp - use npm scripts instead.
+
 ## 2.0.4 - 2016-03-24
 
 * Validate only keys included in the update attrs
