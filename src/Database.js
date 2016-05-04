@@ -150,7 +150,7 @@ class MySqlDatabase extends Database {
 
       // run query using connection
       .then((connection) => {
-        return this._queryConnection(connection, query.sql, query.params, options)
+        return this._queryConnection(connection, query, options)
 
           // always release previously acquired connection
           .finally(() => {
@@ -197,13 +197,9 @@ class MySqlDatabase extends Database {
    * @return {Promise} resolving to the query results.
    * @private
    */
-  _queryConnection(connection, sql, params, options) {
-    // merge options + sql
-    options.sql = sql;
-
-    // promisify query logic
+  _queryConnection(connection, query, options) {
     return new Promise((resolve, reject) => {
-      connection.query(options, params, (err, records) => {
+      connection.query(_.assign({}, options, { sql: query.sql }), query.params, (err, records) => {
         if (err) {
           reject(err);
           return; // exit
