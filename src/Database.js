@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import mysql from 'mysql';
 import type from 'type-of';
 import Database from 'naomi/lib/Database';
-// import Schema from './Schema';
+import Schema from './Schema';
 import Collection from './Collection';
 
 class MySqlDatabase extends Database {
@@ -218,6 +218,10 @@ class MySqlDatabase extends Database {
         });
       });
     });
+  }
+
+  schema(definition) {
+    return new Schema(definition);
   }
 
   collection(name, schema = {}) {
