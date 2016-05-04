@@ -143,7 +143,7 @@ class MySqlDatabase extends Database {
     }
 
     // make sure db is connected
-    return Promise.resolve(this._awaitConnect())
+    return this._awaitConnect()
 
       // acquire new connection from pool
       .then(() => this._acquireConnection())
