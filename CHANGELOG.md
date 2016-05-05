@@ -1,3 +1,8 @@
+## 2.2.0 - 2016-05-05
+
+* Implement Database#executeStream(), Collection#findStream(), Database#schema().
+* Do not wait for database connection - throw error instead.
+
 ## 2.1.0 - 2016-05-02
 
 * Change babel settings to produce code compatible with node v.4+.
