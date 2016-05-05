@@ -49,7 +49,7 @@ describe('Database', () => {
     });
   });
 
-  describe('#query()', () => {
+  describe('#execute()', () => {
     it('throws error when "sql" is unspecified', () => {
       assert.throws(() => db.execute(), TypeError);
     });
@@ -74,6 +74,34 @@ describe('Database', () => {
       assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, 'str'), TypeError);
       assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, null), TypeError);
       assert.throws(() => db.execute({ sql: 'SELECT 1;', params: [] }, []), TypeError);
+    });
+  });
+
+  describe('#executeStream()', () => {
+    it('throws error when "sql" is unspecified', () => {
+      assert.throws(() => db.executeStream(), TypeError);
+    });
+
+    it('throws error when "sql" is invalid', () => {
+      assert.throws(() => db.executeStream(123), TypeError);
+      assert.throws(() => db.executeStream(true), TypeError);
+      assert.throws(() => db.executeStream({ }), TypeError);
+      assert.throws(() => db.executeStream(null), TypeError);
+    });
+
+    it('throws error when "params" is invalid', () => {
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: 123 }), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: true }), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: 'str' }), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: null }), TypeError);
+    });
+
+    it('throws error when "options" is invalid', () => {
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: [] }, 123), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: [] }, true), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: [] }, 'str'), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: [] }, null), TypeError);
+      assert.throws(() => db.executeStream({ sql: 'SELECT 1;', params: [] }, []), TypeError);
     });
   });
 
@@ -118,6 +146,20 @@ describe('Database', () => {
           });
       });
 
+      it('returns records when supplied with sql + options', (done) => {
+        const sql = 'SELECT 1 AS \'num\';';
+
+        db.execute({ sql }, { nestTables: true })
+
+          .then((records) => {
+            assert.isArray(records);
+            assert.isObject(records[0]);
+            assert.isObject(records[0]['']);
+            assert.property(records[0][''], 'num', 1);
+            done();
+          });
+      });
+
       it('returns records when supplied with sql + params + options', (done) => {
         const sql = 'SELECT id FROM `employees` WHERE firstname = ? AND lastname = ?;';
         const params = ['Jordan', 'Belfort'];
@@ -132,19 +174,66 @@ describe('Database', () => {
             done();
           });
       });
+    });
+
+    describe('#executeStream()', () => {
+      it('returns readable stream when supplied with sql', (done) => {
+        const sql = 'SELECT id FROM `employees`;';
+        const readable = db.executeStream({ sql });
+
+        readable.on('data', (record) => {
+          assert.isObject(record);
+          assert.property(record, 'id');
+        });
+
+        readable.on('end', done);
+        readable.on('error', done);
+      });
+
+      it('returns records when supplied with sql + params', (done) => {
+        const sql = 'SELECT id FROM `employees` WHERE firstname = ? AND lastname = ?;';
+        const params = ['Jordan', 'Belfort'];
+
+        const readable = db.executeStream({ sql, params });
+
+        readable.on('data', (record) => {
+          assert.isObject(record);
+          assert.property(record, 'id', 1);
+        });
+
+        readable.on('end', done);
+        readable.on('error', done);
+      });
 
       it('returns records when supplied with sql + options', (done) => {
         const sql = 'SELECT 1 AS \'num\';';
 
-        db.execute({ sql }, { nestTables: true })
+        const readable = db.executeStream({ sql }, { nestTables: true });
 
-          .then((records) => {
-            assert.isArray(records);
-            assert.isObject(records[0]);
-            assert.isObject(records[0]['']);
-            assert.property(records[0][''], 'num', 1);
-            done();
-          });
+        readable.on('data', (record) => {
+          assert.isObject(record);
+          assert.isObject(record['']);
+          assert.property(record[''], 'num', 1);
+        });
+
+        readable.on('end', done);
+        readable.on('error', done);
+      });
+
+      it('returns records when supplied with sql + params + options', (done) => {
+        const sql = 'SELECT id FROM `employees` WHERE firstname = ? AND lastname = ?;';
+        const params = ['Jordan', 'Belfort'];
+
+        const readable = db.executeStream({ sql, params }, { nestTables: true });
+
+        readable.on('data', (record) => {
+          assert.isObject(record);
+          assert.isObject(record.employees);
+          assert.property(record.employees, 'id', 1);
+        });
+
+        readable.on('end', done);
+        readable.on('error', done);
       });
     });
   });

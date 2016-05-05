@@ -1,5 +1,6 @@
-import _ from 'lodash';
+import { Transform as TransformStream } from 'stream';
 import Promise from 'bluebird';
+import _ from 'lodash';
 import mysql from 'mysql';
 import type from 'type-of';
 import Database from 'naomi/lib/Database';
@@ -113,21 +114,22 @@ class MySqlDatabase extends Database {
   }
 
   execute(query, options, callback) {
-    // validate query
+    // validate query argument
     if (!_.isObject(query)) {
       throw new TypeError(`Invalid "query" argument; expected object, received ${type(query)}`);
     }
 
-    // validate sql property of query
+    // set default query properties
+    query = _.defaults(query, { params: [] });
+
+    // validate query.sql property
     if (!_.isString(query.sql)) {
       throw new TypeError('Invalid "sql" property in "query" argument; ' +
         `expected string, received ${type(query.sql)}`);
     }
 
-    // validate params property of query
-    if (_.isUndefined(query.params)) {
-      query.params = [];
-    } else if (!_.isArray(query.params)) {
+    // validate query.params property
+    if (!_.isArray(query.params)) {
       throw new TypeError('Invalid "params" property in "query" argument; ' +
         `expected array, received ${type(query.params)}`);
     }
@@ -144,7 +146,7 @@ class MySqlDatabase extends Database {
 
     // make sure db is connected
     if (!this.isConnected) {
-      return Promise.throw(new Error('Database not connected')).nodeify(callback);
+      throw new Error('Database not connected');
     }
 
     // acquire new connection from pool
@@ -161,6 +163,69 @@ class MySqlDatabase extends Database {
       })
 
       .nodeify(callback);
+  }
+
+  executeStream(query, options = {}) {
+    // validate query argument
+    if (!_.isObject(query)) {
+      throw new TypeError(`Invalid "query" argument; expected object, received ${type(query)}`);
+    }
+
+    // set default query properties
+    query = _.defaults(query, { params: [] });
+
+    // validate query.sql property
+    if (!_.isString(query.sql)) {
+      throw new TypeError('Invalid "sql" property in "query" argument; ' +
+        `expected string, received ${type(query.sql)}`);
+    }
+
+    // validate query.params property
+    if (!_.isArray(query.params)) {
+      throw new TypeError('Invalid "params" property in "query" argument; ' +
+        `expected array, received ${type(query.params)}`);
+    }
+
+    // validate options argument
+    if (!_.isPlainObject(options)) {
+      throw new TypeError(`Invalid "options" argument; expected plain object, received ${type(options)}`);
+    }
+
+    // set default options properties
+    options = _.defaults(options, { highWaterMark: 5 });
+
+    // make sure options.highWaterMark property is valid
+    if (!_.isInteger(options.highWaterMark)) {
+      throw new TypeError('Invalid "highWaterMark" property in "options" argument; ' +
+        `expected integer, received ${type(options.highWaterMark)}`);
+    }
+
+    // make sure db is connected
+    if (!this.isConnected) {
+      throw new Error('Database not connected');
+    }
+
+    const ts = new TransformStream({
+      objectMode: true,
+      transform: (data, encoding, callback) => {
+        callback(null, data);
+      }
+    });
+
+    // acquire new connection from pool
+    this._acquireConnection()
+
+      // run query using connection
+      .then((connection) => {
+        connection.query(_.assign({}, _.omit(options, 'highWaterMark'), { sql: query.sql }), query.params)
+          .stream({ highWaterMark: options.highWaterMark })
+          .pipe(ts);
+
+        // always release previously acquired connection
+        return this._releaseConnection(connection);
+      });
+
+    return ts;
   }
 
   /**
