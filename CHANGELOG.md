@@ -1,3 +1,7 @@
+## 2.2.1 - 2016-05-05
+
+* Remove src/naomi.js completely - use lib/Database.js as the main entry point.
+
 ## 2.2.0 - 2016-05-05
 
 * Implement Database#executeStream(), Collection#findStream(), Database#schema().
