@@ -78,27 +78,27 @@ class MySqlCollection extends Collection {
   // }
 
   find(selector, options, callback) {
-    // validate selector
+    // validate selector argument
     if (_.isFunction(selector)) {
       callback = selector;
       selector = undefined;
       options = {};
-    } else if (!(
-      _.isUndefined(selector) ||
-      _.isBoolean(selector) ||
-      _.isNumber(selector) ||
-      _.isString(selector) ||
-      _.isDate(selector) ||
-      _.isPlainObject(selector) ||
-      _.isArray(selector) ||
-      Buffer.isBuffer(selector)
-    )) {
+    } else if (
+      !_.isUndefined(selector) &&
+      !_.isBoolean(selector) &&
+      !_.isNumber(selector) &&
+      !_.isString(selector) &&
+      !_.isDate(selector) &&
+      !_.isPlainObject(selector) &&
+      !_.isArray(selector) &&
+      !Buffer.isBuffer(selector)
+    ) {
       throw new TypeError('Invalid "selector" argument; ' +
         'expected boolean, number, string, date, object, array or buffer ' +
         `received ${type(selector)}`);
     }
 
-    // validate options
+    // validate options argument
     if (_.isFunction(options)) {
       callback = options;
       options = {};
@@ -117,14 +117,7 @@ class MySqlCollection extends Collection {
     const offset = this.parseOffset(options.offset);
 
     // compile parameterized SQL query
-    const query = compileFindQuery({
-      collection,
-      selection,
-      projection,
-      orderby,
-      limit,
-      offset,
-    });
+    const query = compileFindQuery({ collection, selection, projection, orderby, limit, offset });
 
     // execute query
     return this.db.execute(query).nodeify(callback);
@@ -132,27 +125,7 @@ class MySqlCollection extends Collection {
 
 
   findOne(selector, options, callback) {
-    // validate selector
-    if (_.isFunction(selector)) {
-      callback = selector;
-      selector = undefined;
-      options = {};
-    } else if (!(
-      _.isUndefined(selector) ||
-      _.isBoolean(selector) ||
-      _.isNumber(selector) ||
-      _.isString(selector) ||
-      _.isDate(selector) ||
-      _.isPlainObject(selector) ||
-      _.isArray(selector) ||
-      Buffer.isBuffer(selector)
-    )) {
-      throw new TypeError('Invalid "selector" argument; ' +
-        'expected boolean, number, string, date, object, array or buffer ' +
-        `received ${type(selector)}`);
-    }
-
-    // validate options
+    // validate options argument
     if (_.isFunction(options)) {
       callback = options;
       options = {};
@@ -162,29 +135,14 @@ class MySqlCollection extends Collection {
       throw new TypeError(`Invalid "options" argument; expected object, received ${type(options)}`);
     }
 
-    // parse input
-    const collection = ['COLLECTION', ['KEY', this.name]];
-    const selection = this.validateSelection(this.parseSelection(selector));
-    const projection = this.validateProjection(this.parseProjection(options.projection));
-    const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
-    const limit = this.parseLimit(1);
-    const offset = this.parseOffset(options.offset);
-
-    // compile parameterized SQL query
-    const query = compileFindQuery({
-      collection,
-      selection,
-      projection,
-      orderby,
-      limit,
-      offset,
-    });
+    // overload options argument
+    options.limit = 1;
 
     // execute query
-    return this.db.execute(query)
+    return this.find(selector, options)
 
       .then((records) => {
-        return records[0]; // return sigle record
+        return records[0]; // return single record
       })
 
       .nodeify(callback);
@@ -229,13 +187,7 @@ class MySqlCollection extends Collection {
     const offset = this.parseOffset(options.offset);
 
     // compile parameterized SQL query
-    const query = compileCountQuery({
-      collection,
-      selection,
-      orderby,
-      limit,
-      offset,
-    });
+    const query = compileCountQuery({ collection, selection, orderby, limit, offset });
 
     // execute query
     return this.db.execute(query)
@@ -285,12 +237,7 @@ class MySqlCollection extends Collection {
     const limit = this.parseLimit(options.limit);
 
     // compile parameterized SQL query
-    const query = compileRemoveQuery({
-      collection,
-      selection,
-      orderby,
-      limit,
-    });
+    const query = compileRemoveQuery({ collection, selection, orderby, limit });
 
     // execute query
     return this.db.execute(query).nodeify(callback);
@@ -324,12 +271,7 @@ class MySqlCollection extends Collection {
         const keys = this.schema.getKeys();
         const ignore = options.ignore === true;
 
-        const query = compileInsertQuery({
-          collection,
-          keys,
-          values,
-          ignore
-        });
+        const query = compileInsertQuery({ collection, keys, values, ignore });
 
         // execute query
         return this.db.execute(query)
@@ -387,12 +329,7 @@ class MySqlCollection extends Collection {
         const keys = this.schema.getKeys();
         const updateKeys = _.difference(keys, this.schema.getPrimaryKeys());
 
-        const query = compileUpsertQuery({
-          collection,
-          keys,
-          updateKeys,
-          values,
-        });
+        const query = compileUpsertQuery({ collection, keys, updateKeys, values });
 
         // execute query
         return this.db.execute(query)
@@ -458,13 +395,7 @@ class MySqlCollection extends Collection {
         const orderby = this.validateOrderBy(this.parseOrderBy(options.orderby));
         const limit = this.parseLimit(options.limit);
 
-        return compileUpdateQuery({
-          attrs,
-          collection,
-          selection,
-          orderby,
-          limit,
-        });
+        return compileUpdateQuery({ attrs, collection, selection, orderby, limit });
       })
 
       // execute query
