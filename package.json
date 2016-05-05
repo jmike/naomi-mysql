@@ -2,7 +2,7 @@
   "name": "naomi-mysql",
   "version": "2.2.0",
   "description": "MySQL connector for the Naomi v.2+ ORM.",
-  "main": "lib/naomi.js",
+  "main": "lib/Database.js",
   "scripts": {
     "clean": "rimraf lib",
     "prebuild": "npm run clean",
