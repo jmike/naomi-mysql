@@ -79,6 +79,18 @@ describe('Collection', () => {
         .nodeify(done);
     });
 
+    it('reads records as readable stream', (done) => {
+      const readable = employees.findStream();
+
+      readable.on('data', (record) => {
+        assert.isObject(record);
+        assert.property(record, 'id');
+      });
+
+      readable.on('end', done);
+      readable.on('error', done);
+    });
+
     it('updates record (using primary key)', (done) => {
       employees.update(pk, { age: 37 })
 
