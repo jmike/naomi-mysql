@@ -119,6 +119,10 @@ class MySqlCollection extends Collection {
     // compile parameterized SQL query
     const query = compileFindQuery({ collection, selection, projection, orderby, limit, offset });
 
+    if (options.debug) {
+      console.log(query);
+    }
+
     // execute query
     return this.db.execute(query).nodeify(callback);
   }
