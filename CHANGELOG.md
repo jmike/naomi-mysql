@@ -1,3 +1,7 @@
+## 2.2.2 - 2016-06-08
+
+* Bugfix: invalid function reference.
+
 ## 2.2.1 - 2016-05-05
 
 * Remove src/naomi.js completely - use lib/Database.js as the main entry point.
