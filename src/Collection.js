@@ -367,7 +367,7 @@ class MySqlCollection extends Collection {
       .then((values) => {
         const collection = ['COLLECTION', ['KEY', this.name]];
         const keys = this.schema.getKeys();
-        const updateKeys = _.difference(keys, this.schema.getPrimaryKeys());
+        const updateKeys = _.difference(keys, this.schema.getPrimaryKey());
 
         const query = compileUpsertQuery({ collection, keys, updateKeys, values });
 
